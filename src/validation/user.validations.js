@@ -1,0 +1,43 @@
+const Joi = require("joi");
+const JoiPasswordComplexity = require('joi-password-complexity')
+exports.signUpValidation = (req, res, next)=>{
+    const userSchema = Joi.object({
+        firstName:Joi.string().required(),
+        lastName:Joi.string().required(),
+        phoneNumber:Joi.string().min(10).max(22).allow(null),
+        email:Joi.string().min(2).max(255).required().email(),
+        occupation:Joi.string().allow(null).default(null),
+        city:Joi.string().allow(null).default(null),
+        church:Joi.string().allow(null).default(null),
+        serviceDays:Joi.array().items(Joi.string()),
+        country:Joi.string().allow(null).default(null),
+        // password:JoiPasswordComplexity(complexityOptions).required(),
+        password:Joi.string().min(7).required(),
+        confirmPassword:Joi.string().required().valid(Joi.ref('password'))
+    });
+    const {error, value} = userSchema.validate(req.body);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error);
+    }
+    if(value){
+        next();
+    }
+}
+
+exports.signInValidation = (req,res, next)=>{
+    const loginSchema = Joi.object({
+        email:Joi.string().min(2).max(255).required().email(),
+        // password:JoiPasswordComplexity(complexityOptions).required()
+        password:Joi.string().min(7).required()
+    })
+
+    const {error, value}=loginSchema.validate(req.body);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error);
+    }
+    if(value){
+        next();
+    }
+}
