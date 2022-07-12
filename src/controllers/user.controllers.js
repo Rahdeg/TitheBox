@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
+const {Income} = require("../models/income.model");
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -59,4 +60,45 @@ User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
         return  res.status(400).send({success:false, msg:'user not found'});
     }
 })
+}
+
+exports.addIncome = async function(req,res){
+    const data = req.body
+    try {
+        const income = new Income(data)
+        income.save()
+        return res.status(201).json(income);
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({msg:error});
+    }
+
+}
+
+exports.getIncomes = async function(req,res){
+    try {
+        data = await Income.find({id:req.params.id});
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({msg:error});
+
+    }
+}
+
+exports.getIncome = async function(req,res){
+    try {
+        const data = await Income.findById(req.params.inc_id);
+        if(!data){
+            return res.status(404).json({msg:"Not Found"});
+        }
+        return res.status(200).json(data)
+    } catch (error) {
+        console.log(error.message);
+        if (error.name=="CastError"){
+            return res.status(400).json(error.message);
+        }
+        return res.status(500).json(error);
+        
+    }
 }

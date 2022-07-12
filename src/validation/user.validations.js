@@ -63,3 +63,24 @@ exports.updateValidation = (req, res, next)=>{
         next();
     }
 }
+
+exports.incomeValidation = (req, res, next)=>{
+    const incomeSchema = Joi.object({
+        user_id:Joi.string().required(),
+        type:Joi.string().valid('personal','corporate').required(),
+        businessName:Joi.string().required(),
+        amount:Joi.number().required(),
+        description:Joi.string().allow(null),
+        tithePercentage:Joi.number().min(10).max(100).required(),
+        frequency:Joi.string().valid('daily','weekly','monthly','yearly','random').required()
+
+    });
+    const {error, value} = incomeSchema.validate(req.body);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error.details[0].message);
+    }
+    if(value){
+        next();
+    }
+}
