@@ -9,7 +9,7 @@ exports.signUpValidation = (req, res, next)=>{
         occupation:Joi.string().allow(null).default(null),
         city:Joi.string().allow(null).default(null),
         church:Joi.string().allow(null).default(null),
-        serviceDays:Joi.array().items(Joi.string()),
+        serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
         country:Joi.string().allow(null).default(null),
         // password:JoiPasswordComplexity(complexityOptions).required(),
         password:Joi.string().min(7).required(),
