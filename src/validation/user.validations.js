@@ -41,3 +41,25 @@ exports.signInValidation = (req,res, next)=>{
         next();
     }
 }
+
+exports.updateValidation = (req, res, next)=>{
+    const userSchema = Joi.object({
+        firstName:Joi.string(),
+        lastName:Joi.string(),
+        phoneNumber:Joi.string().min(10).max(22).allow(null),
+        occupation:Joi.string().allow(null).default(null),
+        city:Joi.string().allow(null).default(null),
+        church:Joi.string().allow(null).default(null),
+        serviceDays:Joi.array().items(Joi.string()),
+        country:Joi.string().allow(null).default(null),
+        // password:JoiPasswordComplexity(complexityOptions).required(),
+    });
+    const {error, value} = userSchema.validate(req.body);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error);
+    }
+    if(value){
+        next();
+    }
+}

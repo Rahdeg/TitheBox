@@ -46,3 +46,17 @@ exports.signIn = async function(req,res){
         
     }
 };
+
+
+
+exports.update= async (req,res)=>{
+const user = req.body;  
+User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
+    if (data) {
+        return  res.status(200).send({success:true, updated:data}); 
+    }
+    if (err) {
+        return  res.status(400).send({success:false, msg:'user not found'});
+    }
+})
+}

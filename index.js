@@ -12,3 +12,10 @@ app.use('/api/v1/users', user_route)
 app.get('/', (req,res)=>{
     res.status(200).json({msg:"Welcome to the api for the tithe box app"})
 })
+
+app.all("*", (req, res) => {
+    res.send({
+      status: false,
+      messsage: "Oops! you've hitted an invalid route.",
+    });
+  });
