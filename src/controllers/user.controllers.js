@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
+const transporter= require('../verification/nodemailer')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -22,7 +23,21 @@ exports.signUp = async function(req,res){
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
         user.save();
+        const options = {
+            from: "walett95@gmail.com",
+            to: [data.email, "rahdegonline@gmail.com"],
+            subject: "Account created successfully",
+            text: "Thank you for creating an account with us, click here to comfirm your Registration and Login.",
+          };
+          transporter.sendMail(options, (err, data) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log("email sent :", data.response);
+            }
+          });
         return res.status(201).json(user);
+        
     });
    
 };
