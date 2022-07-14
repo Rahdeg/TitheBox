@@ -2,8 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
-const transporter= require('../verification/nodemailer');
-const {sendCode, generateCode} = require('../utils/functions')
+const {sendCode, generateCode,senddetails} = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -23,20 +22,9 @@ exports.signUp = async function(req,res){
         }
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
+        senddetails(data);
         user.save();
-        const options = {
-            from: "walett95@gmail.com",
-            to: [data.email, "rahdegonline@gmail.com"],
-            subject: "Account created successfully",
-            text: "Thank you for creating an account with us, click here to comfirm your Registration and Login.",
-          };
-          transporter.sendMail(options, (err, data) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log("email sent :", data.response);
-            }
-          });
+
         return res.status(201).json(user);
         
     });
@@ -155,3 +143,28 @@ exports.verifyCode = async function(req,res){
     }
 
 }
+
+exports.updatepassword= async (req,res)=>{
+    const data = req.body;
+    const email_exists = await User.findOne({email:data.email});
+    if(!email_exists){
+        return res.status(400).json({msg:"email does not exists"});
+    }
+    bcrypt.hash(data.password, salt,(err,hash)=>{
+        if(err){
+            return res.status(500).json({msg:err})
+        }
+        if(hash){
+           data.password = hash
+           User.findByIdAndUpdate(req.params.id,data ,{new:true}, (err, data)=>{
+            if (data) {
+                return  res.status(200).send({success:true, updated:data}); 
+            }
+            if (err) {
+                return  res.status(400).send({success:false, msg:'user not found'});
+            }
+        })
+    
+        }})
+    
+    }

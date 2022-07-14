@@ -84,3 +84,21 @@ exports.incomeValidation = (req, res, next)=>{
         next();
     }
 }
+
+exports.updatepasswordvalidation = (req,res, next)=>{
+    const loginSchema = Joi.object({
+        // password:JoiPasswordComplexity(complexityOptions).required()
+        email:Joi.string().min(2).max(255).required().email(),
+        password:Joi.string().min(7).required(),
+        confirmPassword:Joi.string().min(7).required()
+    })
+
+    const {error, value}=loginSchema.validate(req.body);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error);
+    }
+    if(value){
+        next();
+    }
+}
