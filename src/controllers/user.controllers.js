@@ -136,7 +136,7 @@ exports.verifyCode = async function(req,res){
         if (user.code == code){
             user.code = undefined;
             user.save()
-            return res.status(200).json({msg:"Code Valid"});
+            return res.status(200).json({msg:"Code  is Valid"});
         }else{
             return res.status(400).json({msg:"Invalid Code"});
         }
