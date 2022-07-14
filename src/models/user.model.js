@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema({
     church:{type:String, default:null},
     serviceDays:[{type:String}],
     country:{type:String, defailt:null},
-    password:{type:String, required:true, select:false}
+    password:{type:String, required:true, select:false},
+    token:{type:String},
+    code:{type:String}
 
 },{
     timestamps:true
