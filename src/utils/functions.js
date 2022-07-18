@@ -64,3 +64,11 @@ exports.generateCode = function(codeLength){
     }
     return randomCode;
 }
+
+exports.filterOutPasswordField=function(data) {
+    const filteredData = Object.fromEntries(
+      Object.entries(data).filter(([key]) => !key.includes("password"))
+    );
+
+    return filteredData;
+  }
