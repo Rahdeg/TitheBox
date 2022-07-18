@@ -4,7 +4,7 @@ const {signUpValidation, signInValidation,updateValidation, incomeValidation,upd
 
 router.post('/signUp', signUpValidation, signUp);
 router.post('/signIn', signInValidation, signIn);
-router.get('/users/:id',  getUserbyid);
+router.get('/:id',  getUserbyid);
 router.post('/signIn/forgotPassword',forgotPassword);
 router.post('/signIn/verify',verifyCode)
 router.put('/update/:id', updateValidation, update);
