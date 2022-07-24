@@ -1,4 +1,10 @@
 const Transport = require("../verification/nodemailer");
+const Flutterwave = require('flutterwave-node-v3');
+
+require("dotenv").config();
+const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
+
+const Income = require("../models/income.model");
 
 exports.sendCode = function(email,code){
     mailOptions={
@@ -71,4 +77,33 @@ exports.filterOutPasswordField=function(data) {
     );
 
     return filteredData;
-  }
+}
+
+exports.getChargeFee = async function(amount,currency){
+    try {
+        let detail = {amount,currency};
+        const flutter_fee = await flw.Transaction.fee(detail);
+        const gain = flutter_fee.data.flutterwave_fee;
+        return gain
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+exports.calaculateTithe = async function(income_id,user_id){
+    try {
+        const income = await Income.findById(income_id)
+        if(income.user_id != user_id){
+            return res.status(400).json({msg:"User and income detail don't match"})
+        }
+        amount = Number(income.amount)
+        percentage = Number(income.tithePercentage)
+        const titheAmount = amount*(percentage/100)
+        return titheAmount
+
+    } catch (error) {
+        console.error(error)
+    }
+    
+}
