@@ -1,6 +1,16 @@
 const Joi = require("joi");
 const JoiPasswordComplexity = require('joi-password-complexity')
+
+const churchSchema = Joi.object({
+    name:Joi.string().required(),
+    serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
+    bankName:Joi.string().required(),
+    accountNumber:Joi.string().required(),
+    subAccountId:Joi.string().allow(null)
+});
+
 exports.signUpValidation = (req, res, next)=>{
+
     const userSchema = Joi.object({
         firstName:Joi.string().required(),
         lastName:Joi.string().required(),
@@ -8,8 +18,7 @@ exports.signUpValidation = (req, res, next)=>{
         email:Joi.string().min(2).max(255).required().email(),
         occupation:Joi.string().allow(null).default(null),
         city:Joi.string().allow(null).default(null),
-        church:Joi.string().allow(null).default(null),
-        serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
+        churches:Joi.array().items(churchSchema),
         country:Joi.string().allow(null).default(null),
         // password:JoiPasswordComplexity(complexityOptions).required(),
         password:Joi.string().min(7).required(),
@@ -68,7 +77,9 @@ exports.incomeValidation = (req, res, next)=>{
     const incomeSchema = Joi.object({
         user_id:Joi.string().required(),
         type:Joi.string().valid('personal','corporate').required(),
+        currency:Joi.string().uppercase().required(),
         businessName:Joi.string().required(),
+        businessAddress:Joi.string().required(),
         amount:Joi.number().required(),
         description:Joi.string().allow(null),
         tithePercentage:Joi.number().min(10).max(100).required(),
