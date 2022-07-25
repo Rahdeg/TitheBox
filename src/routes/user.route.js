@@ -13,7 +13,6 @@ router.post('/:id/income',incomeValidation, addIncome);
 router.get('/:id/income', getIncomes);
 router.get('/:id/income/:inc_id', getIncome);
 
-getUserbyid
 
 
 
