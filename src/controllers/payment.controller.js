@@ -7,7 +7,7 @@ const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
 const api = axios.create({
     baseURL:'https://api.flutterwave.com/v3',
-    headers:{Authorization: `Bearer ${FLUTTER_SEC}`}
+    headers:{Authorization: `Bearer ${process.env.FLUTTER_SEC}`}
 })
 
 exports.paymentSuccessful = async function(req,res){

@@ -108,3 +108,6 @@ exports.calaculateTithe = async function(income_id,user_id){
     
 }
 
+exports.createSubAccount = async function(user_id){
+    let user = await User.findById(user_id);
+}
