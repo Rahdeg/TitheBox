@@ -7,6 +7,7 @@ const incomeSchema = new mongoose.Schema({
     },
     type:{type:String, required:true},
     businessName:{type:String, required:true},
+    businessAddress:{type:String, required:true},
     amount:{type:Number, required:true},
     description:{type:String, default:null},
     tithePercentage:{type:Number, min:10, max:100, required:true},
