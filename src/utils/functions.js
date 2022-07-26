@@ -1,6 +1,6 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
-
+const {User} = require("../models/user.model")
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
@@ -11,7 +11,7 @@ exports.sendCode = function(email,code){
         from:"walett95@gmail.com",
         to:email,
         subject:"Forgot Password",
-        html:`<h4>Kindly Enter the following Code:</h4> 
+        html:`<h4>Kindly Enter the following Code:</h4>
         <h1 style="background:blue; color:white; text-align:center;">${code}</h1>`
     }
     Transport.sendMail(mailOptions,function(error,response){
@@ -71,13 +71,13 @@ exports.generateCode = function(codeLength){
     return randomCode;
 }
 
-exports.filterOutPasswordField=function(data) {
-    const filteredData = Object.fromEntries(
-      Object.entries(data).filter(([key]) => !key.includes("password"))
-    );
+// exports.filterOutPasswordField=function(data) {
+//     const filteredData = Object.fromEntries(
+//       Object.entries(data).filter(([key]) => !key.includes("password"))
+//     );
 
-    return filteredData;
-}
+//     return filteredData;
+// }
 
 exports.getChargeFee = async function(amount,currency){
     try {
@@ -105,9 +105,37 @@ exports.calaculateTithe = async function(income_id,user_id){
     } catch (error) {
         console.error(error)
     }
-    
+
 }
 
 exports.createSubAccount = async function(user_id){
-    let user = await User.findById(user_id);
+    let payload = {}
+    try {
+        let country = {"country":"NG"}
+        // create an endpoint to serve the frontend with the list of Banks
+        // let banks = await flw.Bank.country(country)
+        let user = await User.findById(user_id);
+        const churches = user.churches
+        for (let church of churches){
+            if (!church.subAccountId){
+                payload.country = country.country;
+                payload.account_bank = "044";
+                payload.account_number = church.accountNumber;
+                payload.business_name = church.name;
+                payload.business_email  = user.email;
+                payload.business_contact_mobile = user.phoneNumber;
+                payload.business_contact = church.address;
+                payload.split_type = "flat";
+                payload.split_value = 20;
+                const result = await flw.Subaccount.create(payload);
+                church.subAccountId = result.data.subaccount_id;
+            }else{
+                continue;
+            }
+        }
+        user.save();
+    } catch (error) {
+        console.error(error)
+    }
+
 }

@@ -2,9 +2,10 @@ const mongoose = require("mongoose")
 const churchSchema = new mongoose.Schema({
     name:{type:String, required:true},
     serviceDays:[{type:String,required:true}],
+    address:{type:String,required:true, default:null},
     bankName:{type:String, required:true},
     accountNumber:{type:String, required:true},
-    subAccountId:{type:String}
+    subAccountId:{type:String, default:null}
 })
 const userSchema = new mongoose.Schema({
     firstName:{type:String, required:true},
