@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
-const {sendCode, generateCode,senddetails,filterOutPasswordField} = require('../utils/functions')
+const {sendCode, generateCode,senddetails,filterOutPasswordField,createSubaccount,updateSubaccount } = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -23,6 +23,8 @@ exports.signUp = async function(req,res){
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
         senddetails(data);
+        createSubaccount(data);
+        // user.churches.subAccountId=response.data.subaccount_id
         user.save();
 
         return res.status(201).json(user);
@@ -69,6 +71,7 @@ exports.getUserbyid=async (req,res)=>{
 
 exports.update= async (req,res)=>{
 const user = req.body;  
+updateSubaccount (data);
 User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
     if (data) {
         return  res.status(200).send({success:true, updated:data}); 

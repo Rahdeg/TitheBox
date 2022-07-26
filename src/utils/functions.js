@@ -1,5 +1,6 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
+const User = require("../models/user.model").User;
 
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
@@ -108,6 +109,70 @@ exports.calaculateTithe = async function(income_id,user_id){
     
 }
 
-exports.createSubAccount = async function(user_id){
-    let user = await User.findById(user_id);
+
+exports. createSubaccount = async function(data){
+    try {
+        const payload = {
+            "account_bank": '058',
+            "account_number":data.churches[0].accountNumber,
+            "business_name": data.firstName,
+            "business_email": data.email,
+            "business_contact_mobile": data.phoneNumber,
+            "business_contact": "09087930450",
+            "country": "NG",
+            "meta": [
+                {
+                    "meta_name": "mem_adr",
+                    "meta_value": "0x16241F327213"
+                }
+            ],
+            "split_type": "percentage",
+            "split_value": 0.5
+        }
+
+        const response = await flw.Subaccount.create(payload)
+        // console.log(response);
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+exports. updateSubaccount = async function (data) {
+
+    try {
+
+        const payload = {
+            "id": "3244", //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
+            "business_name": data.firstName,
+            "business_email": data.emial,
+            "account_bank": '044',
+            "account_number": data.churches[0].accountNumber,
+            "split_type": "flat",
+            "split_value": "200"
+        }
+
+
+        const response = await flw.Subaccount.update(payload)
+        console.log(response);
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+
+exports. getbankcode = async function(){
+var request = require('request');
+var options = {
+  'method': 'GET',
+  'url': '{{BASE_API_URL}}/banks/NG',
+  'headers': {
+    'Authorization': 'Bearer FLUTTER_SEC'
+  }
+};
+request(options, function (error, response) {
+  if (error) throw new Error(error);
+  console.log(response.body);
+});
 }

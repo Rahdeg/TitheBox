@@ -2,6 +2,7 @@ const Flutterwave = require('flutterwave-node-v3');
 const axios = require("axios");
 const {getChargeFee, calaculateTithe} = require("../utils/functions")
 
+
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
@@ -56,57 +57,4 @@ exports.payment = async function(){
     } catch (err) {
         console.log(err);
     }
-}
-
-exports. createSubaccount = async function(){
-
-    try {
-        const payload = {
-            "account_bank": "044",
-            "account_number": "0690000037",
-            "business_name": "Eternal Blue",
-            "business_email": "petya@stux.net",
-            "business_contact": "Anonymous",
-            "business_contact_mobile": "090890382",
-            "business_mobile": "09087930450",
-            "country": "NG",
-            "meta": [
-                {
-                    "meta_name": "mem_adr",
-                    "meta_value": "0x16241F327213"
-                }
-            ],
-            "split_type": "percentage",
-            "split_value": 0.5
-        }
-
-        const response = await flw.Subaccount.create(payload)
-        console.log(response);
-    } catch (error) {
-        console.log(error)
-    }
-
-}
-
-exports. updateSubaccount = async function () {
-
-    try {
-
-        const payload = {
-            "id": "3244", //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
-            "business_name": "Xyx lol!",
-            "business_email": "mad@o.enterprises",
-            "account_bank": "044",
-            "account_number": "0690000040",
-            "split_type": "flat",
-            "split_value": "200"
-        }
-
-
-        const response = await flw.Subaccount.update(payload)
-        console.log(response);
-    } catch (error) {
-        console.log(error)
-    }
-
 }
