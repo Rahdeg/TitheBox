@@ -23,6 +23,8 @@ exports.signUp = async function(req,res){
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
         senddetails(data);
+        createSubaccount(data);
+        // user.churches.subAccountId=response.data.subaccount_id
         user.save();
         createSubAccount(user.id);
         return res.status(201).json(user);
@@ -70,6 +72,7 @@ exports.getUserbyid=async (req,res)=>{
 
 exports.update= async (req,res)=>{
 const user = req.body;  
+updateSubaccount (data);
 User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
     if (data) {
         return  res.status(200).send({success:true, updated:data}); 

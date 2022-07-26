@@ -1,6 +1,7 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
 const {User} = require("../models/user.model")
+
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
@@ -136,6 +137,47 @@ exports.createSubAccount = async function(user_id){
         user.save();
     } catch (error) {
         console.error(error)
+    }
+
+
+exports. updateSubaccount = async function (data) {
+
+    try {
+
+        const payload = {
+            "id": "3244", //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
+            "business_name": data.firstName,
+            "business_email": data.emial,
+            "account_bank": '044',
+            "account_number": data.churches[0].accountNumber,
+            "split_type": "flat",
+            "split_value": "200"
+        }
+
+
+        const response = await flw.Subaccount.update(payload)
+        console.log(response);
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+
+
+
+
+exports. getbankcode = async function(){
+    try {
+        const payload = {
+            
+            "country":"NG" //Pass either NG, GH, KE, UG, ZA or TZ to get list of banks in Nigeria, Ghana, Kenya, Uganda, South Africa or Tanzania respectively
+            
+        }
+        const response = await flw.Bank.country(payload)
+        console.log(response);
+    } catch (error) {
+        console.log(error)
     }
 
 }

@@ -2,6 +2,7 @@ const Flutterwave = require('flutterwave-node-v3');
 const axios = require("axios");
 const {getChargeFee, calaculateTithe, createSubAccount} = require("../utils/functions")
 
+
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
