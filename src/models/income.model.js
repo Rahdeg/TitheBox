@@ -6,6 +6,7 @@ const incomeSchema = new mongoose.Schema({
         required:true
     },
     type:{type:String, required:true},
+    currency:{type:String, required:true},
     businessName:{type:String, required:true},
     businessAddress:{type:String, required:true},
     amount:{type:Number, required:true},

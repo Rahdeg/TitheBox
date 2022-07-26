@@ -1,6 +1,6 @@
 const Flutterwave = require('flutterwave-node-v3');
 const axios = require("axios");
-const {getChargeFee, calaculateTithe} = require("../utils/functions")
+const {getChargeFee, calaculateTithe, createSubAccount} = require("../utils/functions")
 
 
 require("dotenv").config();
@@ -57,4 +57,9 @@ exports.payment = async function(){
     } catch (err) {
         console.log(err);
     }
+}
+
+exports.tester = async function(req,res){
+    createSubAccount(req.params.id);
+    return res.json("testing")
 }
