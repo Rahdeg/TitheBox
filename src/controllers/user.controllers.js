@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
-const {sendCode, generateCode,senddetails,filterOutPasswordField, createSubAccount} = require('../utils/functions')
+const {sendCode, generateCode,senddetails,filterOutPasswordField,createSubAccount,updateSubaccount } = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -23,8 +23,6 @@ exports.signUp = async function(req,res){
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
         senddetails(data);
-        createSubaccount(data);
-        // user.churches.subAccountId=response.data.subaccount_id
         user.save();
         createSubAccount(user.id);
         return res.status(201).json(user);
@@ -47,7 +45,6 @@ exports.signIn = async function(req,res){
                 return res.status(400).json({msg:"Invalid Credentials"});
             }else{
                 user.token = jwt.sign({id:user._id,email:user.email},ACCESS_SECRET);
-                user.password = "";
                 return res.status(200).json(user);
             }
         })
@@ -57,8 +54,7 @@ exports.signIn = async function(req,res){
 
 exports.getUserbyid=async (req,res)=>{
     User.findById(req.params.id,(err,data)=>{
-        // data = filterOutPasswordField(data);
-        
+        data = filterOutPasswordField(data);
        if (err) {
            return  res.status(400).send({success:false, msg:'user not found'});
        }
