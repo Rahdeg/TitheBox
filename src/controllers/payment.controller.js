@@ -1,6 +1,8 @@
 const Flutterwave = require('flutterwave-node-v3');
 const axios = require("axios");
 const {getChargeFee, calaculateTithe, createSubAccount} = require("../utils/functions")
+const {User} = require("../models/user.model");
+const {Income} = require("../models/income.model");
 
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
@@ -26,12 +28,14 @@ exports.paymentSuccessful = async function(req,res){
 
 // will need to create subaccounts for church accounts when user creates them
 // will need to update subaccount if user changes details of church
-exports.payment = async function(){
+exports.payment = async function(req,res){
     try {
-        const currency = "NGN"; // will need to specify this field in the income model
+        const user = await User.findById(req.params.id)
+        const income = await Income.findById(req.params.inc_id)
+        const church = user.churches
+        const currency = income.currency; // will need to specify this field in the income model
         const amount  = calaculateTithe(req.params.inc_id,req.params.id)
         const charge = getChargeFee(amount,currency)
-        user = User.findById(req.params.id);
         if(!user){
             return res.status(404).json({msg:"User Not Found"})
         }
@@ -46,13 +50,14 @@ exports.payment = async function(){
             },
             customer: {
                 email: user.email,
-                phonenumber: user.phonenumber,
-                name: `${user.firstname} ${user.lastname}`
+                phonenumber: user.phoneNumber,
+                name: `${user.firstName} ${user.lastName}`
             }
         };
-        const response = await api.post("/payments",data);
-        console.log(response)
-        return res.status(200).json({url:response})
+        console.log(church)
+        // const response = await api.post("/payments",data);
+        // console.log(response)
+        // return res.status(200).json({url:response})
     } catch (err) {
         console.log(err);
     }

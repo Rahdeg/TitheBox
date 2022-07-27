@@ -3,5 +3,5 @@ const { payment, paymentSuccessful , tester} = require("../controllers/payment.c
 
 router.get('/:id/test', tester);
 router.get("/paymentSuccess", paymentSuccessful);
-router.post('/:id/income/:inc_id/pay', payment);
+router.post('/:id/income/:inc_id/pay/church/:church_id', payment);
 module.exports = router
