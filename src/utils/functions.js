@@ -1,6 +1,7 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
 const {User} = require("../models/user.model")
+
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
@@ -109,33 +110,105 @@ exports.calaculateTithe = async function(income_id,user_id){
 }
 
 exports.createSubAccount = async function(user_id){
-    let payload = {}
-    try {
-        let country = {"country":"NG"}
         // create an endpoint to serve the frontend with the list of Banks
         // let banks = await flw.Bank.country(country)
         let user = await User.findById(user_id);
-        const churches = user.churches
-        for (let church of churches){
-            if (!church.subAccountId){
-                payload.country = country.country;
-                payload.account_bank = "044";
-                payload.account_number = church.accountNumber;
-                payload.business_name = church.name;
-                payload.business_email  = user.email;
-                payload.business_contact_mobile = user.phoneNumber;
-                payload.business_contact = church.address;
-                payload.split_type = "flat";
-                payload.split_value = 20;
-                const result = await flw.Subaccount.create(payload);
-                church.subAccountId = result.data.subaccount_id;
-            }else{
-                continue;
-            }
-        }
-        user.save();
-    } catch (error) {
-        console.error(error)
-    }
+        if (user) {
+            try {
 
+                const payload = {
+                    "account_bank": "044",
+                    "account_number": user.churches[0].accountNumber,
+                    "business_name": user.churches[0].name,
+                    "business_email": user.email,
+                    "business_contact": user.churches[0].address,
+                    "business_contact_mobile": "090890382",
+                    "business_mobile": user.phoneNumber,
+                    "country": "NG",
+                    "meta": [
+                        {
+                            "meta_name": "mem_adr",
+                            "meta_value": "0x16241F327213"
+                        }
+                    ],
+                    "split_type": "percentage",
+                    "split_value": 0.5
+                }
+                const result = await flw.Subaccount.create(payload)
+                console.log(result)
+    
+                user.churches[0].subAccountId = result.data.subaccount_id;
+                user.save();
+                
+            } catch (error) {
+                console.log(error)
+            }
+           
+        }
+
+       
+    
 }
+
+
+// let churches = user.churches
+        
+// for (let church of churches){
+//     if (!church.subAccountId){
+//         payload.country = country.country;
+//         payload.account_bank = "058";
+//         payload.account_number = church.accountNumber;
+//         payload.business_name = church.name;
+//         payload.business_email  = user.email;
+//         payload.business_contact_mobile = user.phoneNumber;
+//         payload.business_contact = church.address;
+//         payload.split_type = "flat";
+//         payload.split_value = 20;
+//         const result = await flw.Subaccount.create(payload);
+//         church.subAccountId = result.data.subaccount_id;
+//         console.log(result);
+//     }else{
+//         continue;
+//     }
+// }
+// exports. updateSubaccount = async function (data) {
+
+//     try {
+
+//         const payload = {
+//             "id": "3244", //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
+//             "business_name": data.firstName,
+//             "business_email": data.emial,
+//             "account_bank": '044',
+//             "account_number": data.churches[0].accountNumber,
+//             "split_type": "flat",
+//             "split_value": "200"
+//         }
+
+
+//         const response = await flw.Subaccount.update(payload)
+//         console.log(response);
+//     } catch (error) {
+//         console.log(error)
+//     }
+
+// }
+
+
+
+
+
+// exports. getbankcode = async function(){
+//     try {
+//         const payload = {
+            
+//             "country":"NG" //Pass either NG, GH, KE, UG, ZA or TZ to get list of banks in Nigeria, Ghana, Kenya, Uganda, South Africa or Tanzania respectively
+            
+//         }
+//         const response = await flw.Bank.country(payload)
+//         console.log(response);
+//     } catch (error) {
+//         console.log(error)
+//     }
+
+// }

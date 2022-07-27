@@ -4,6 +4,7 @@ const {getChargeFee, calaculateTithe, createSubAccount} = require("../utils/func
 const {User} = require("../models/user.model");
 const {Income} = require("../models/income.model");
 
+
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 

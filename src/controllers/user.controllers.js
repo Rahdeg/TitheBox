@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
-const {sendCode, generateCode,senddetails,filterOutPasswordField, createSubAccount} = require('../utils/functions')
+const {sendCode, generateCode,senddetails,filterOutPasswordField,createSubAccount,updateSubaccount } = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -45,7 +45,6 @@ exports.signIn = async function(req,res){
                 return res.status(400).json({msg:"Invalid Credentials"});
             }else{
                 user.token = jwt.sign({id:user._id,email:user.email},ACCESS_SECRET);
-                user.password = "";
                 return res.status(200).json(user);
             }
         })
@@ -55,8 +54,7 @@ exports.signIn = async function(req,res){
 
 exports.getUserbyid=async (req,res)=>{
     User.findById(req.params.id,(err,data)=>{
-        // data = filterOutPasswordField(data);
-        
+        data = filterOutPasswordField(data);
        if (err) {
            return  res.status(400).send({success:false, msg:'user not found'});
        }
@@ -70,6 +68,7 @@ exports.getUserbyid=async (req,res)=>{
 
 exports.update= async (req,res)=>{
 const user = req.body;  
+updateSubaccount (data);
 User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
     if (data) {
         return  res.status(200).send({success:true, updated:data}); 

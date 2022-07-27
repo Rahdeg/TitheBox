@@ -5,6 +5,7 @@ const churchSchema = Joi.object({
     name:Joi.string().required(),
     serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
     bankName:Joi.string().required(),
+    address:Joi.string().required(),
     accountNumber:Joi.string().required(),
     subAccountId:Joi.string().allow(null)
 });
