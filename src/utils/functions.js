@@ -113,31 +113,26 @@ exports.createSubAccount = async function(user_id){
         // create an endpoint to serve the frontend with the list of Banks
         // let banks = await flw.Bank.country(country)
         let user = await User.findById(user_id);
+        let churches = user.churches
         if (user) {
             try {
-
-                const payload = {
-                    "account_bank": "044",
-                    "account_number": user.churches[0].accountNumber,
-                    "business_name": user.churches[0].name,
-                    "business_email": user.email,
-                    "business_contact": user.churches[0].address,
-                    "business_contact_mobile": "090890382",
-                    "business_mobile": user.phoneNumber,
-                    "country": "NG",
-                    "meta": [
-                        {
-                            "meta_name": "mem_adr",
-                            "meta_value": "0x16241F327213"
-                        }
-                    ],
-                    "split_type": "percentage",
-                    "split_value": 0.5
+                for (let church in churches){
+                    const payload = {
+                        "account_bank": "044",
+                        "account_number": churches[church].accountNumber,
+                        "business_name": churches[church].name,
+                        "business_email": user.email,
+                        "business_contact": churches[church].address,
+                        "business_contact_mobile": user.phoneNumber,
+                        "business_mobile": user.phoneNumber,
+                        "country": "NG",
+                        "split_type": "flat",
+                        "split_value": 20
+                    }
+                    const result = await flw.Subaccount.create(payload)
+                    churches[church].subAccountId = result.data.subaccount_id;
                 }
-                const result = await flw.Subaccount.create(payload)
-                console.log(result)
-    
-                user.churches[0].subAccountId = result.data.subaccount_id;
+
                 user.save();
                 
             } catch (error) {

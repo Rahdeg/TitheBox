@@ -65,6 +65,9 @@ exports.payment = async function(req,res){
 }
 
 exports.tester = async function(req,res){
-    createSubAccount(req.params.id);
+    const result = await flw.Subaccount.delete({id:"RS_FB2E1134D856B5B7F7A9F44AB722EAAA"})
+    // const result = await flw.Subaccount.fetch_all()
+    console.log(result)
     return res.json("testing")
 }
+

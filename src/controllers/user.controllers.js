@@ -8,7 +8,8 @@ const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
 
 exports.signUp = async function(req,res){
-    const data = req.body;
+    try{
+        const data = req.body;
     const email_exists = await User.findOne({email:data.email});
     if(email_exists){
         return res.status(400).json({msg:"email already exists"});
@@ -23,11 +24,20 @@ exports.signUp = async function(req,res){
         const user = new User(data);
         user.token = jwt.sign({id:user.id,email:user.email},ACCESS_SECRET)
         senddetails(data);
-        user.save();
-        createSubAccount(user.id);
-        return res.status(201).json(user);
+        user.save((error,user)=>{
+            if(error){
+                return res.status(400).json({msg:"User Not Saved"})
+            }else if(user){
+                createSubAccount(user.id);
+                return res.status(201).json(user);
+            }
+        });
         
     });
+    }catch{
+        console.log(error)
+    }
+    
    
 };
 exports.signIn = async function(req,res){
@@ -179,5 +189,40 @@ exports.updatepassword= async (req,res)=>{
         })
     
         }})
+    
+    }
+
+    exports.delete_user = async function(req,res){
+        try{
+            const user = await User.findByIdAndDelete(req.params.id)
+            if(!user){
+                return res.status(404).json({msg:`No user with id ${req.params.id}`})
+            }else{
+                return res.status(200).json({msg:"User Deleted Successfully",data:null})
+            }
+    
+        }catch(error){
+            console.log(error)
+        }
+    
+    }
+    
+    exports.delete_income = async function(req,res){
+        try{
+            const user = await User.findById(req.params.id)
+            const income = await Income.findByIdAndDelete(req.params.inc_id)
+            // if(!user){
+            //     return res.status(404).json({msg:`No user with id ${req.params.id}`})
+            // }
+            if(!income){
+                return res.status(404).json({msg:`No income with id ${req.params.id}`})
+            }else{
+                return res.status(200).json({msg:"Income Deleted Successfully",data:null})
+            }
+    
+    
+        }catch(error){
+            console.log(error)
+        }
     
     }
