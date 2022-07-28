@@ -1,6 +1,6 @@
 const Flutterwave = require('flutterwave-node-v3');
 const axios = require("axios");
-const {getChargeFee, calaculateTithe, createSubAccount} = require("../utils/functions")
+const {getChargeFee, calculateTithe, createSubAccount} = require("../utils/functions")
 const {User} = require("../models/user.model");
 const {Income} = require("../models/income.model");
 
@@ -33,32 +33,43 @@ exports.payment = async function(req,res){
     try {
         const user = await User.findById(req.params.id)
         const income = await Income.findById(req.params.inc_id)
-        const church = user.churches
-        const currency = income.currency; // will need to specify this field in the income model
-        const amount  = calaculateTithe(req.params.inc_id,req.params.id)
-        const charge = getChargeFee(amount,currency)
         if(!user){
-            return res.status(404).json({msg:"User Not Found"})
+            return res.status(404).json({msg:`User With ${req.params.id} Not Found`})
         }
+        if(!income){
+            return res.status(404).json({msg:`Income With ${req.params.inc_id} Not Found`})
+        }
+        const churches = user.churches
+        const church = churches.find((church)=>{return church.id===req.params.church_id;})
+        const currency = income.currency; // will need to specify this field in the income model
+        const amount  = await calculateTithe(req.params.inc_id,req.params.id)
+        const charge = await getChargeFee(amount,currency);
+        
         const data = {
-            tx_ref: "test_tithe_1",
+            tx_ref: "test_tithe_10",
             amount: amount,
             currency: "NGN",
             redirect_url: "http://localhost:4000/api/v1/users/paymentSuccess",
             meta: {
                 consumer_id: req.params.id,
-                consumer_church: user.church
+                consumer_church: church.name
             },
             customer: {
                 email: user.email,
                 phonenumber: user.phoneNumber,
                 name: `${user.firstName} ${user.lastName}`
-            }
+            },
+            subaccounts:[
+                {
+                    id:church.subAccountId,
+                    transaction_charge_type:"flat",
+                    transaction_charge:charge
+                }
+            ]
         };
-        console.log(church)
-        // const response = await api.post("/payments",data);
-        // console.log(response)
-        // return res.status(200).json({url:response})
+        const response = await api.post("/payments",data);
+        console.log(response.data)
+        return res.status(200).json(response.data)
     } catch (err) {
         console.log(err);
     }

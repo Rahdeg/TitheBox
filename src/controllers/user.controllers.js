@@ -64,7 +64,7 @@ exports.signIn = async function(req,res){
 
 exports.getUserbyid=async (req,res)=>{
     User.findById(req.params.id,(err,data)=>{
-        data = filterOutPasswordField(data);
+        // data = filterOutPasswordField(data);
        if (err) {
            return  res.status(400).send({success:false, msg:'user not found'});
        }
