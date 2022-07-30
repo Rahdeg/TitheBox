@@ -114,3 +114,29 @@ exports.updatepasswordvalidation = (req,res, next)=>{
         next();
     }
 }
+
+
+exports.churchValidation = (req,res, next)=>{
+    const bank = Joi.object({
+        id:Joi.number(),
+        code:Joi.string().required(),
+        name:Joi.string().required()
+
+    })
+    const churchSchema = Joi.object({
+        bank:bank,
+        name:Joi.string().required(),
+        serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
+        address:Joi.string().required(),
+        accountName:Joi.string().required(),
+        accountNumber:Joi.string().required()
+    })
+    const {error, value} = churchSchema.validate(data);
+    if(error){
+        console.log(error);
+        return res.status(400).json(error);
+    }
+    if(value){
+        next();
+    }
+}

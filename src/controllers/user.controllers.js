@@ -1,11 +1,14 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Flutterwave = require('flutterwave-node-v3');
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
+const {Church} = require("../models/church.model");
 const {sendCode, generateCode,senddetails,filterOutPasswordField,createSubAccount,updateSubaccount } = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
+const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
 exports.signUp = async function(req,res){
     try{
@@ -192,37 +195,86 @@ exports.updatepassword= async (req,res)=>{
     
     }
 
-    exports.delete_user = async function(req,res){
-        try{
-            const user = await User.findByIdAndDelete(req.params.id)
-            if(!user){
-                return res.status(404).json({msg:`No user with id ${req.params.id}`})
-            }else{
-                return res.status(200).json({msg:"User Deleted Successfully",data:null})
-            }
-    
-        }catch(error){
-            console.log(error)
+exports.delete_user = async function(req,res){
+    try{
+        const user = await User.findByIdAndDelete(req.params.id)
+        if(!user){
+            return res.status(404).json({msg:`No user with id ${req.params.id}`})
+        }else{
+            return res.status(200).json({msg:"User Deleted Successfully",data:null})
         }
-    
+
+    }catch(error){
+        console.log(error)
     }
-    
-    exports.delete_income = async function(req,res){
-        try{
-            const user = await User.findById(req.params.id)
-            const income = await Income.findByIdAndDelete(req.params.inc_id)
-            // if(!user){
-            //     return res.status(404).json({msg:`No user with id ${req.params.id}`})
-            // }
-            if(!income){
-                return res.status(404).json({msg:`No income with id ${req.params.id}`})
-            }else{
-                return res.status(200).json({msg:"Income Deleted Successfully",data:null})
-            }
-    
-    
-        }catch(error){
-            console.log(error)
+
+}
+
+exports.delete_income = async function(req,res){
+    try{
+        const user = await User.findById(req.params.id)
+        const income = await Income.findByIdAndDelete(req.params.inc_id)
+        // if(!user){
+        //     return res.status(404).json({msg:`No user with id ${req.params.id}`})
+        // }
+        if(!income){
+            return res.status(404).json({msg:`No income with id ${req.params.id}`})
+        }else{
+            return res.status(200).json({msg:"Income Deleted Successfully",data:null})
         }
-    
+
+
+    }catch(error){
+        console.log(error)
     }
+
+}
+
+exports.updateIncome = async function(req,res){
+    const update = req.body
+    Income.findByIdAndUpdate(req.params.inc_id, update, {new:true}, (err,data)=>{
+        if (err){console.log(err)};
+        if (data){
+            return res.status(200).json({msg:"Income updated successfully",data:data})
+        }
+    })
+}
+
+exports.getBanks = async function(req,res){
+    const country = req.query?.country;
+    let banks = null;
+    if(country){
+        const payload = {country:country};
+        banks = await flw.Bank.country(payload);
+        return res.status(200).json(banks.data);
+    }else{
+        const payload = {country:"NG"};
+        banks = await flw.Bank.country(payload);
+        return res.status(200).json(banks.data);
+    }
+}
+
+exports.addChurch = async function(req,res){
+    const data = req.body
+    const bank = data.bank;
+    const details = {address:data.address, name:data.name, serviceDays:data.serviceDays};
+    const account = {accountName:data.accountName, accountNumber:data.accountNumber};
+    const church = new Church(details);
+    // create subAccount function goes here
+    // the subAccount function checks if there is already a subAccount with the details provided
+    church.save()
+};
+
+exports.getChurches= async function(req,res){
+    const churches = Church.find({user_id:req.params.id})
+    return res.status(200).json(churches);
+};
+
+exports.getChurch = async function(req,res){
+    const church = Church.findById(req.params.church_id);
+    return res.status(200).json(church);
+};
+
+exports.updateChurch = async function(req,res){};
+
+exports.deleteChurch = async function(req,res){};
