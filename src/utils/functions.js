@@ -1,6 +1,7 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
 const {User} = require("../models/user.model");
+const {Subaccount} = require("../models/subaccout.model")
 const {Income} = require("../models/income.model");
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
@@ -128,6 +129,7 @@ exports.createSubAccount = async function(user_id){
                         "split_value": 20
                     }
                     const result = await flw.Subaccount.create(payload)
+                    
                     churches[church].subAccountId = result.data.subaccount_id;
                 }
 
@@ -144,34 +146,15 @@ exports.createSubAccount = async function(user_id){
 }
 
 
-// let churches = user.churches
-        
-// for (let church of churches){
-//     if (!church.subAccountId){
-//         payload.country = country.country;
-//         payload.account_bank = "058";
-//         payload.account_number = church.accountNumber;
-//         payload.business_name = church.name;
-//         payload.business_email  = user.email;
-//         payload.business_contact_mobile = user.phoneNumber;
-//         payload.business_contact = church.address;
-//         payload.split_type = "flat";
-//         payload.split_value = 20;
-//         const result = await flw.Subaccount.create(payload);
-//         church.subAccountId = result.data.subaccount_id;
-//         console.log(result);
-//     }else{
-//         continue;
-//     }
-// }
-// exports. updateSubaccount = async function (data) {
 
+// exports. updateSubaccount = async function (data) {
+//     let user = await User.findById(data);
 //     try {
 
 //         const payload = {
-//             "id": "3244", //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
+//             "id": data.churches[0].subAccountId, //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
 //             "business_name": data.firstName,
-//             "business_email": data.emial,
+//             "business_email": data.email,
 //             "account_bank": '044',
 //             "account_number": data.churches[0].accountNumber,
 //             "split_type": "flat",

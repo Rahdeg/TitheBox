@@ -78,7 +78,6 @@ exports.getUserbyid=async (req,res)=>{
 
 exports.update= async (req,res)=>{
 const user = req.body;  
-updateSubaccount (data);
 User.findByIdAndUpdate(req.params.id,user ,{new:true}, (err, data)=>{
     if (data) {
         return  res.status(200).send({success:true, updated:data}); 
