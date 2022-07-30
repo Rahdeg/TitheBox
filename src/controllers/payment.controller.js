@@ -15,7 +15,7 @@ const api = axios.create({
 
 exports.paymentSuccessful = async function(req,res){
     const status = req.query.status
-    // const transaction_id = req.query.transaction_id
+    const transaction_id = req.query.transaction_id
     // const tx_ref = req.query.tx_ref
     if(status === "successful"){
         const transactionDetails = await flw.Transaction.verify(transaction_id)
@@ -68,7 +68,6 @@ exports.payment = async function(req,res){
             ]
         };
         const response = await api.post("/payments",data);
-        console.log(response.data)
         return res.status(200).json(response.data)
     } catch (err) {
         console.log(err);
@@ -76,8 +75,9 @@ exports.payment = async function(req,res){
 }
 
 exports.tester = async function(req,res){
-    const result = await flw.Subaccount.delete({id:"RS_FB2E1134D856B5B7F7A9F44AB722EAAA"})
+    // const result = await flw.Subaccount.delete({id:"RS_05D1FE11FE1E581066D4A29625E6D3F0"})
     // const result = await flw.Subaccount.fetch_all()
+    const result = await flw.Bank.country({country:"GH"})
     console.log(result)
     return res.json("testing")
 }
