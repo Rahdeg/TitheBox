@@ -1,7 +1,6 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require('flutterwave-node-v3');
 const {User} = require("../models/user.model");
-const {Subaccount} = require("../models/subaccout.model")
 const {Income} = require("../models/income.model");
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
@@ -108,42 +107,80 @@ exports.calculateTithe = async function(income_id,user_id){
 
 }
 
-exports.createSubAccount = async function(user_id){
-        // create an endpoint to serve the frontend with the list of Banks
-        // let banks = await flw.Bank.country(country)
-        let user = await User.findById(user_id);
-        let churches = user.churches
-        if (user) {
-            try {
-                for (let church in churches){
-                    const payload = {
-                        "account_bank": "044",
-                        "account_number": churches[church].accountNumber,
-                        "business_name": churches[church].name,
-                        "business_email": user.email,
-                        "business_contact": churches[church].address,
-                        "business_contact_mobile": user.phoneNumber,
-                        "business_mobile": user.phoneNumber,
-                        "country": "NG",
-                        "split_type": "flat",
-                        "split_value": 20
-                    }
-                    const result = await flw.Subaccount.create(payload)
-                    
-                    churches[church].subAccountId = result.data.subaccount_id;
-                }
+exports.subAccount= async function(data){
 
-                user.save();
-                
-            } catch (error) {
-                console.log(error)
+    const response = await flw.Subaccount.fetch_all()
+    const check = response.data;
+
+    if (check[0].account_number === data.accountNumber) {
+                check.subaccount_id = data.subAccountIds
+                return;
+    } else {
+        try {
+            const payload = {
+                "account_bank": "044",
+                "account_number": data.accountNumber,
+                "business_name": data.name,
+                "business_email": data.email,
+                "business_contact": data.address,
+                "business_contact_mobile": data.phone,
+                "business_mobile": data.phone,
+                "country": "NG",
+                "meta": [
+                    {
+                        "meta_name": "mem_adr",
+                        "meta_value": "0x16241F327213"
+                    }
+                ],
+                "split_type": "percentage",
+                "split_value": 0.5
             }
-           
+    
+            const response = await flw.Subaccount.create(payload)
+            console.log(response);
+        } catch (error) {
+            console.log(error)
         }
+    }
+    
+}
+
+// exports.createSubAccount = async function(user_id){
+//         // create an endpoint to serve the frontend with the list of Banks
+//         // let banks = await flw.Bank.country(country)
+//         let user = await User.findById(user_id);
+//         let churches = user.churches
+//         if (user) {
+//             try {
+//                 for (let church in churches){
+//                     const payload = {
+//                         "account_bank": "044",
+//                         "account_number": churches[church].accountNumber,
+//                         "business_name": churches[church].name,
+//                         "business_email": user.email,
+//                         "business_contact": churches[church].address,
+//                         "business_contact_mobile": user.phoneNumber,
+//                         "business_mobile": user.phoneNumber,
+//                         "country": "NG",
+//                         "split_type": "flat",
+//                         "split_value": 20
+//                     }
+//                     const result = await flw.Subaccount.create(payload)
+                    
+//                     churches[church].subAccountId = result.data.subaccount_id;
+//                 }
+
+//                 user.save();
+                
+//             } catch (error) {
+//                 console.log(error)
+//             }
+           
+//         }
 
        
     
-}
+//  }
 
 
 

@@ -4,7 +4,7 @@ const Flutterwave = require('flutterwave-node-v3');
 const User = require("../models/user.model").User;
 const {Income} = require("../models/income.model");
 const {Church} = require("../models/church.model");
-const {sendCode, generateCode,senddetails,filterOutPasswordField,createSubAccount,updateSubaccount } = require('../utils/functions')
+const {sendCode, generateCode,senddetails,filterOutPasswordField,subAccount,updateSubaccount } = require('../utils/functions')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET
@@ -258,10 +258,18 @@ exports.addChurch = async function(req,res){
     const bank = data.bank;
     const details = {address:data.address, name:data.name, serviceDays:data.serviceDays};
     const account = {accountName:data.accountName, accountNumber:data.accountNumber};
-    const church = new Church(details);
-    // create subAccount function goes here
-    // the subAccount function checks if there is already a subAccount with the details provided
+    const user= await User.findById(req.params.id);
+    if(!user){
+        return res.status(404).json({msg:`No user with id ${req.params.id}`})
+    }else{
+        details.user_id=user.id
+        const church = new Church(details);
+
+    // subAccount(data);
     church.save()
+    return res.status(201).json(church)
+    }
+    
 };
 
 exports.getChurches= async function(req,res){
@@ -274,6 +282,16 @@ exports.getChurch = async function(req,res){
     return res.status(200).json(church);
 };
 
-exports.updateChurch = async function(req,res){};
+exports.updateChurch = async function(req,res){
+    const data = req.body
+
+    Church.findByIdAndUpdate(req.params.inc_id, update, {new:true}, (err,data)=>{
+        if (err){console.log(err)};
+        if (data){
+            return res.status(200).json({msg:"Church updated successfully",data:data})
+        }
+    })
+
+};
 
 exports.deleteChurch = async function(req,res){};
