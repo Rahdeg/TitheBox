@@ -112,10 +112,30 @@ exports.subAccount= async function(data){
     const response = await flw.Subaccount.fetch_all()
     const check = response.data;
 
-    if (check[0].account_number === data.accountNumber) {
+    if (check) {
                 check.subaccount_id = data.subAccountIds
                 return;
     } else {
+        console.log("entered this else block")
+        console.log({
+            "account_bank": "044",
+            "account_number": data.accountNumber,
+            "business_name": data.name,
+            "business_email": data.email,
+            "business_contact": data.address,
+            "business_contact_mobile": data.phone,
+            "business_mobile": data.phone,
+            "country": "NG",
+            "meta": [
+                {
+                    "meta_name": "mem_adr",
+                    "meta_value": "0x16241F327213"
+                }
+            ],
+            "split_type": "percentage",
+            "split_value": 0.5
+        }
+)
         try {
             const payload = {
                 "account_bank": "044",
@@ -137,76 +157,14 @@ exports.subAccount= async function(data){
             }
     
             const response = await flw.Subaccount.create(payload)
-            console.log(response);
+            console.log('=======>RESPONSE:=====>', response);
+            return response.data;
         } catch (error) {
             console.log(error)
         }
     }
     
 }
-
-// exports.createSubAccount = async function(user_id){
-//         // create an endpoint to serve the frontend with the list of Banks
-//         // let banks = await flw.Bank.country(country)
-//         let user = await User.findById(user_id);
-//         let churches = user.churches
-//         if (user) {
-//             try {
-//                 for (let church in churches){
-//                     const payload = {
-//                         "account_bank": "044",
-//                         "account_number": churches[church].accountNumber,
-//                         "business_name": churches[church].name,
-//                         "business_email": user.email,
-//                         "business_contact": churches[church].address,
-//                         "business_contact_mobile": user.phoneNumber,
-//                         "business_mobile": user.phoneNumber,
-//                         "country": "NG",
-//                         "split_type": "flat",
-//                         "split_value": 20
-//                     }
-//                     const result = await flw.Subaccount.create(payload)
-                    
-//                     churches[church].subAccountId = result.data.subaccount_id;
-//                 }
-
-//                 user.save();
-                
-//             } catch (error) {
-//                 console.log(error)
-//             }
-           
-//         }
-
-       
-    
-//  }
-
-
-
-// exports. updateSubaccount = async function (data) {
-//     let user = await User.findById(data);
-//     try {
-
-//         const payload = {
-//             "id": data.churches[0].subAccountId, //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
-//             "business_name": data.firstName,
-//             "business_email": data.email,
-//             "account_bank": '044',
-//             "account_number": data.churches[0].accountNumber,
-//             "split_type": "flat",
-//             "split_value": "200"
-//         }
-
-
-//         const response = await flw.Subaccount.update(payload)
-//         console.log(response);
-//     } catch (error) {
-//         console.log(error)
-//     }
-
-// }
-
 
 
 
