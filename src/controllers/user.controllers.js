@@ -273,7 +273,10 @@ exports.getBanks = async function (req, res) {
 
 exports.addChurch = async function (req, res) {
   const data = req.body;
-  const subAccountData = await subAccount(data);
+  const subacct_exists = await SubAccount.findOne({ accountNumber: data.accountNumber });
+  console.log("hmmmm",subacct_exists)
+  if (!subacct_exists) {
+    const subAccountData = await subAccount(data);
   const subAccountId = subAccountData.subaccount_id;
   const bankname= subAccountData.bank_name;
   console.log("i am here",subAccountData)
@@ -296,6 +299,32 @@ exports.addChurch = async function (req, res) {
     church.save();
     return res.status(201).json(church);
   }
+  }if (subacct_exists) {
+        const details = {
+            address: data.address,
+            name: data.name,
+            serviceDays: data.serviceDays,
+            subAccountIds:subacct_exists.subAccountId
+          };
+          const bankname= subacct_exists.bankName;
+ const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bankCode,subAccountId:subacct_exists.subAccountId,bankName:bankname};
+ const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+  } else {
+    console.log("ello",subacct_exists)
+    details.user_id = user.id;
+    const church = new Church(details);
+    const subacct = new SubAccount(account);
+    subacct.save();
+    church.save();
+    return res.status(201).json(subacct_exists);
+  }
+    
+  }
+    
+  
+  
 };
 
 exports.getChurches = async function (req, res) {

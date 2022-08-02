@@ -108,34 +108,6 @@ exports.calculateTithe = async function(income_id,user_id){
 }
 
 exports.subAccount= async function(data){
-
-    const response = await flw.Subaccount.fetch_all()
-    const check = response.data;
-
-    if (check) {
-                check.subaccount_id = data.subAccountIds
-                return;
-    } else {
-        console.log("entered this else block")
-        console.log({
-            "account_bank": "044",
-            "account_number": data.accountNumber,
-            "business_name": data.name,
-            "business_email": data.email,
-            "business_contact": data.address,
-            "business_contact_mobile": data.phone,
-            "business_mobile": data.phone,
-            "country": "NG",
-            "meta": [
-                {
-                    "meta_name": "mem_adr",
-                    "meta_value": "0x16241F327213"
-                }
-            ],
-            "split_type": "percentage",
-            "split_value": 0.5
-        }
-)
         try {
             const payload = {
                 "account_bank": "044",
@@ -157,12 +129,10 @@ exports.subAccount= async function(data){
             }
     
             const response = await flw.Subaccount.create(payload)
-            console.log('=======>RESPONSE:=====>', response);
             return response.data;
         } catch (error) {
             console.log(error)
         }
-    }
     
 }
 
