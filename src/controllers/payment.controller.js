@@ -18,17 +18,14 @@ const api = axios.create({
 exports.paymentSuccessful = async function(req,res){
     const status = req.query.status
     const transaction_id = req.query.transaction_id
-    console.log(req.query)
-    console.log(status, transaction_id)
     // const tx_ref = req.query.tx_ref
     if(status === "successful"){
-        const transactionDetails = await flw.Transaction.verify(transaction_id)
+        const transactionDetails = await flw.Transaction.verify({id:transaction_id})
         console.log(transactionDetails)
         return res.status(200).json({msg:"Payment successful"})
     }
     if(status === "cancelled"){
-        // const transactionDetails = await flw.Transaction.verify(transaction_id)
-        // transactionDetails(transactionDetails)
+        // no transaction_id generated
         return res.status(200).json({msg:"payment cancelled"})
     }
 }
@@ -55,10 +52,10 @@ exports.payment = async function(req,res){
         const currency = income.currency;
         const amount  = await calculateTithe(req.params.inc_id,req.params.id)
         const charge = await getChargeFee(amount,currency);
-        
+        const total_amount = amount + charge 
         const data = {
-            tx_ref: "test_tithe_1",
-            amount: amount,
+            tx_ref: "test_tithe_12",
+            amount: total_amount,
             currency: currency,
             redirect_url: "http://localhost:4000/api/v1/redirect/paymentSuccess",
             meta: {
@@ -78,6 +75,7 @@ exports.payment = async function(req,res){
                 }
             ]
         };
+        console.log(data)
         const response = await api.post("/payments",data);
         // return res.send(data);
         return res.status(200).json(response.data);
