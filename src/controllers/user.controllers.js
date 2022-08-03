@@ -10,7 +10,7 @@ const {
   generateCode,
   senddetails,
   filterOutPasswordField,
-  subAccount,
+  createSubAccount,
   updateSubaccount,
 } = require("../utils/functions");
 require("dotenv").config();
@@ -39,7 +39,6 @@ exports.signUp = async function (req, res) {
         if (error) {
           return res.status(400).json({ msg: "User Not Saved" });
         } else if (user) {
-          createSubAccount(user.id);
           return res.status(201).json(user);
         }
       });
@@ -274,67 +273,63 @@ exports.getBanks = async function (req, res) {
 exports.addChurch = async function (req, res) {
   const data = req.body;
   const subacct_exists = await SubAccount.findOne({ accountNumber: data.accountNumber });
-  console.log("hmmmm",subacct_exists)
-  if (!subacct_exists) {
-    const subAccountData = await subAccount(data);
-  const subAccountId = subAccountData.subaccount_id;
-  const bankname= subAccountData.bank_name;
-  console.log("i am here",subAccountData)
-  // const bank = data.bank;
+  const user = await User.findById(req.params.id);
   const details = {
     address: data.address,
     name: data.name,
-    serviceDays: data.serviceDays,
-    subAccountIds:subAccountId
+    serviceDays: data.serviceDays
   };
-  const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bankCode,subAccountId:subAccountId,bankName:bankname};
-  const user = await User.findById(req.params.id);
   if (!user) {
     return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-  } else {
+  }
+  if (!subacct_exists) {
+    const subAccountData = await createSubAccount(data,user);
+    if(subAccountData){
+      const bankname= subAccountData.bank_name;
+      details.user_id = user.id;
+      const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bank.code,subAccountId:subAccountData.subaccount_id,bankName:bankname};
+      const subacct = new SubAccount(account);
+      details.subAccountIds=subacct.id;
+      const church = new Church(details);
+      subacct.save();
+      church.save();
+      return res.status(201).json(church);
+    }
+  }else if (subacct_exists) {
+    const details = {
+      address: data.address,
+      name: data.name,
+      serviceDays: data.serviceDays,
+      subAccountIds:subacct_exists.subAccountId
+    };
     details.user_id = user.id;
+    const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bankCode,subAccountId:subacct_exists.id,bankName:subacct_exists.bankName};
     const church = new Church(details);
-    const subacct = new SubAccount(account);
-    subacct.save();
     church.save();
     return res.status(201).json(church);
-  }
-  }if (subacct_exists) {
-        const details = {
-            address: data.address,
-            name: data.name,
-            serviceDays: data.serviceDays,
-            subAccountIds:subacct_exists.subAccountId
-          };
-          const bankname= subacct_exists.bankName;
- const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bankCode,subAccountId:subacct_exists.subAccountId,bankName:bankname};
- const user = await User.findById(req.params.id);
-  if (!user) {
-    return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-  } else {
-    console.log("ello",subacct_exists)
-    details.user_id = user.id;
-    const church = new Church(details);
-    const subacct = new SubAccount(account);
-    subacct.save();
-    church.save();
-    return res.status(201).json(subacct_exists);
-  }
     
   }
-    
-  
-  
 };
 
 exports.getChurches = async function (req, res) {
-  const churches = Church.find({ user_id: req.params.id });
-  return res.status(200).json(churches);
+  try {
+    const churches = await Church.find({ user_id: req.params.id });
+    return res.status(200).json(churches);
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({msg:"An Error Occured"})
+  }
+
 };
 
 exports.getChurch = async function (req, res) {
-  const church = Church.findById(req.params.church_id);
-  return res.status(200).json(church);
+  try {
+    const church = await Church.findById(req.params.church_id);
+    return res.status(200).json(church);
+  } catch (error) {
+    res.status(500).json({msg:"An Error Occured"})
+  }
+
 };
 
 exports.updateChurch = async function (req, res) {
@@ -357,4 +352,46 @@ exports.updateChurch = async function (req, res) {
   );
 };
 
-exports.deleteChurch = async function (req, res) {};
+exports.deleteChurch = async function (req, res) {
+  try {
+    Church.findByIdAndDelete(req.params.church_id,(err,church)=>{
+      if(err){
+        return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`})
+      }
+      if(church){
+        return res.status(200).json({message:"Church deleted successfully", data:null})
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({msg:"An Error Occured"})
+  }
+};
+
+
+exports.getChurchAccounts = async function(req,res){
+  try {
+    const church = await Church.findById(req.params.church_id).populate('subAccountIds');
+    if(!church){
+      return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`});
+    }else{
+      const accounts = church.subAccountIds
+      return res.status(200).json(accounts)
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({msg:"An Error Occured"})
+  }
+}
+
+exports.getChurchAccount = async function(req,res){
+  try {
+    const account = await SubAccount.findById(req.params.acc_id);
+    if(!account){
+      return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`})
+    }else{
+      return res.status(200).json(account)
+    }
+  } catch (error) {
+    return res.status(500).json({msg:"An Error Occured"})
+  }
+}

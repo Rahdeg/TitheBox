@@ -77,7 +77,7 @@ exports.incomeValidation = (req, res, next)=>{
     const incomeSchema = Joi.object({
         user_id:Joi.string().required(),
         type:Joi.string().valid('personal','corporate').required(),
-        currency:Joi.string().uppercase().required(),
+        currency:Joi.string().uppercase().required().valid("NGN","USD","EUR"),
         businessName:Joi.string().required(),
         businessAddress:Joi.string().required(),
         amount:Joi.number().required(),
@@ -128,9 +128,10 @@ exports.churchValidation = (req,res, next)=>{
         serviceDays:Joi.array().items(Joi.string().valid("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")),
         address:Joi.string().required(),
         accountName:Joi.string().required(),
-        accountNumber:Joi.string().required()
+        accountNumber:Joi.string().required(),
+        country: Joi.string().required().valid("NG","GH","KE","UG","ZA","TZ")
     })
-    const {error, value} = churchSchema.validate(data);
+    const {error, value} = churchSchema.validate(req.body);
     if(error){
         console.log(error);
         return res.status(400).json(error);

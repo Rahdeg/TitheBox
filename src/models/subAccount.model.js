@@ -7,4 +7,4 @@ const subAccountSchema = new mongoose.Schema({
     subAccountId:{type:String, default:null}
 })
 
-exports.SubAccount = mongoose.model('SubAccount',subAccountSchema);
+exports.SubAccount = mongoose.model('SubAccounts',subAccountSchema);
