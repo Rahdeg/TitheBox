@@ -32,7 +32,6 @@ exports.paymentSuccessful = async function(req,res){
             ){
                 transaction.status="successful"
                 transaction.save();
-                console.log(transaction);
                 return res.status(200).json({msg:"Payment Successful"});
             }else{
                 let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);

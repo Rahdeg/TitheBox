@@ -418,7 +418,7 @@ exports.getChurchAccount = async function(req,res){
 exports.getTransactions = async function(req,res){
   try {
     const user = await User.findById(req.params.id);
-    const transactions = await Transaction.find({user_id:req.params.id});
+    const transactions = await Transaction.find({user_id:req.params.id}).sort({createdAt:-1});
     if(!user){
       return res.status(404).json({msg:`User with id ${req.params.tran_id} not found`});
     }else{
