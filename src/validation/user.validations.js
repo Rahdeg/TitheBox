@@ -19,7 +19,6 @@ exports.signUpValidation = (req, res, next)=>{
         email:Joi.string().min(2).max(255).required().email(),
         occupation:Joi.string().allow(null).default(null),
         city:Joi.string().allow(null).default(null),
-        churches:Joi.array().items(churchSchema),
         country:Joi.string().allow(null).default(null),
         // password:JoiPasswordComplexity(complexityOptions).required(),
         password:Joi.string().min(7).required(),
@@ -75,7 +74,6 @@ exports.updateValidation = (req, res, next)=>{
 
 exports.incomeValidation = (req, res, next)=>{
     const incomeSchema = Joi.object({
-        user_id:Joi.string().required(),
         type:Joi.string().valid('personal','corporate').required(),
         currency:Joi.string().uppercase().required().valid("NGN","USD","EUR"),
         businessName:Joi.string().required(),

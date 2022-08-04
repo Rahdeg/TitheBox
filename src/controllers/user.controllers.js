@@ -34,11 +34,12 @@ exports.signUp = async function (req, res) {
       }
       const user = new User(data);
       user.token = jwt.sign({ id: user.id, email: user.email }, ACCESS_SECRET);
-      senddetails(data);
       user.save((error, user) => {
         if (error) {
+          console.log(error)
           return res.status(400).json({ msg: "User Not Saved" });
         } else if (user) {
+          senddetails(data);
           return res.status(201).json(user);
         }
       });
@@ -96,43 +97,24 @@ exports.update = async (req, res) => {
   });
 };
 
-exports.addIncome = async function (req, res) {
-  const data = req.body;
+exports.delete_user = async function (req, res) {
   try {
-    const income = new Income(data);
-    income.save();
-    return res.status(201).json(income);
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+    } else {
+      await Income.deleteMany({user_id:req.params.id})
+      await Church.deleteMany({user_id:req.params.id})
+      return res
+        .status(200)
+        .json({ msg: "User Deleted Successfully", data: null });
+    }
   } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ msg: error });
+    console.log(error);
+    return res.status(500).json({msg:"An Error Occured"})
   }
 };
 
-exports.getIncomes = async function (req, res) {
-  try {
-    data = await Income.find({ id: req.params.id });
-    return res.status(200).json(data);
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ msg: error });
-  }
-};
-
-exports.getIncome = async function (req, res) {
-  try {
-    const data = await Income.findById(req.params.inc_id);
-    if (!data) {
-      return res.status(404).json({ msg: "Not Found" });
-    }
-    return res.status(200).json(data);
-  } catch (error) {
-    console.log(error.message);
-    if (error.name == "CastError") {
-      return res.status(400).json(error.message);
-    }
-    return res.status(500).json(error);
-  }
-};
 
 exports.forgotPassword = async function (req, res) {
   let codeSend = generateCode(5);
@@ -201,19 +183,67 @@ exports.updatepassword = async (req, res) => {
   });
 };
 
-exports.delete_user = async function (req, res) {
+
+exports.addIncome = async function (req, res) {
+  const data = req.body;
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
+    const user = await User.findById(req.params.id)
+    if(!user){
       return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-    } else {
-      return res
-        .status(200)
-        .json({ msg: "User Deleted Successfully", data: null });
     }
+    data.user_id = user.id
+    const income = new Income(data);
+    income.save();
+    return res.status(201).json(income);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
+    return res.status(500).json({ msg: error });
   }
+};
+
+exports.getIncomes = async function (req, res) {
+  try {
+    data = await Income.find({ id: req.params.id });
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ msg: error });
+  }
+};
+
+exports.getIncome = async function (req, res) {
+  try {
+    const data = await Income.findById(req.params.inc_id);
+    if (!data) {
+      return res.status(404).json({ msg: "Not Found" });
+    }
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error.message);
+    if (error.name == "CastError") {
+      return res.status(400).json(error.message);
+    }
+    return res.status(500).json(error);
+  }
+};
+
+exports.updateIncome = async function (req, res) {
+  const update = req.body;
+  Income.findByIdAndUpdate(
+    req.params.inc_id,
+    update,
+    { new: true },
+    (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+      if (data) {
+        return res
+          .status(200)
+          .json({ msg: "Income updated successfully", data: data });
+      }
+    }
+  );
 };
 
 exports.delete_income = async function (req, res) {
@@ -237,24 +267,6 @@ exports.delete_income = async function (req, res) {
   }
 };
 
-exports.updateIncome = async function (req, res) {
-  const update = req.body;
-  Income.findByIdAndUpdate(
-    req.params.inc_id,
-    update,
-    { new: true },
-    (err, data) => {
-      if (err) {
-        console.log(err);
-      }
-      if (data) {
-        return res
-          .status(200)
-          .json({ msg: "Income updated successfully", data: data });
-      }
-    }
-  );
-};
 
 exports.getBanks = async function (req, res) {
   const country = req.query?.country;
@@ -289,6 +301,7 @@ exports.addChurch = async function (req, res) {
       details.user_id = user.id;
       const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bank.code,subAccountId:subAccountData.subaccount_id,bankName:bankname};
       const subacct = new SubAccount(account);
+      console.log(subacct)
       details.subAccountIds=subacct.id;
       const church = new Church(details);
       subacct.save();
@@ -300,7 +313,7 @@ exports.addChurch = async function (req, res) {
       address: data.address,
       name: data.name,
       serviceDays: data.serviceDays,
-      subAccountIds:subacct_exists.subAccountId
+      subAccountIds:subacct_exists.id
     };
     details.user_id = user.id;
     const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bankCode,subAccountId:subacct_exists.id,bankName:subacct_exists.bankName};
@@ -313,6 +326,10 @@ exports.addChurch = async function (req, res) {
 
 exports.getChurches = async function (req, res) {
   try {
+    const user = User.findById(req.params.id)
+    if(!user){
+      return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`});
+    }
     const churches = await Church.find({ user_id: req.params.id });
     return res.status(200).json(churches);
   } catch (error) {

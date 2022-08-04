@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
     email:{type:String, required:true},
     occupation:{type:String, default:null},
     city:{type:String, default:null},
-    churches:[{type:mongoose.Schema.Types.ObjectId,ref:'Churches',required:true}],
     country:{type:String, defailt:null},
     password:{type:String, required:true, select:false},
     token:{type:String},

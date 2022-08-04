@@ -5,6 +5,7 @@ const {User} = require("../models/user.model");
 const {SubAccount} = require("../models/subAccount.model")
 const {Income} = require("../models/income.model");
 const { Church } = require('../models/church.model');
+const {Transaction} = require("../models/transaction.model");
 
 
 require("dotenv").config();
@@ -17,17 +18,37 @@ const api = axios.create({
 
 exports.paymentSuccessful = async function(req,res){
     const status = req.query.status
-    const transaction_id = req.query.transaction_id
-    // const tx_ref = req.query.tx_ref
-    if(status === "successful"){
-        const transactionDetails = await flw.Transaction.verify({id:transaction_id})
-        console.log(transactionDetails)
-        return res.status(200).json({msg:"Payment successful"})
+    try {
+        if(status === "successful"){
+            const transaction_id = req.query.transaction_id
+            const tx_ref = req.query.tx_ref
+            const result = await flw.Transaction.verify({id:transaction_id});
+            const transaction = await Transaction.findById(tx_ref);
+            let fee = await getChargeFee(transaction.amount, result.data.currency);
+            let amount = transaction.amount + fee;
+            if(result.data.status=="successful"
+            &&result.data.amount == amount
+            &&result.data.currency == transaction.currency
+            ){
+                transaction.status="successful"
+                transaction.save()
+                return res.status(200).json({msg:"Payment Successful"});
+            }else{
+                let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);
+                return res.status(200).json({msg:"Payment Not Successful"});
+            }
+        }else if(status === "cancelled"){
+            let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);
+            return res.status(200).json({msg:"Payment Cancelled"})
+        }else if(status === "failed"){
+            let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);
+            return res.status(200).json({msg:"Payment failed"})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({msg:"An Error Occured"})
     }
-    if(status === "cancelled"){
-        // no transaction_id generated
-        return res.status(200).json({msg:"payment cancelled"})
-    }
+   
 }
 
 // will need to update subaccount if user changes details of church
@@ -52,12 +73,22 @@ exports.payment = async function(req,res){
         const currency = income.currency;
         const amount  = await calculateTithe(req.params.inc_id,req.params.id)
         const charge = await getChargeFee(amount,currency);
-        const total_amount = amount + charge 
+        const total_amount = amount + charge
+        const transactionDetails = {
+            user_id:user.id,
+            income_id:income.id,
+            amount:amount,
+            church:church.id,
+            tithePercentage:income.tithePercentage,
+            currency:income.currency
+        }
+        const transaction = Transaction(transactionDetails);
+        transaction.save()
         const data = {
-            tx_ref: "test_tithe_12",
+            tx_ref: `${transaction.id}`,
             amount: total_amount,
             currency: currency,
-            redirect_url: "http://localhost:4000/api/v1/redirect/paymentSuccess",
+            redirect_url: `http://localhost:4000/api/v1/redirect/payment/${transaction.id}`,
             meta: {
                 consumer_id: req.params.id,
                 consumer_church: church.name
@@ -75,9 +106,7 @@ exports.payment = async function(req,res){
                 }
             ]
         };
-        console.log(data)
         const response = await api.post("/payments",data);
-        // return res.send(data);
         return res.status(200).json(response.data);
     } catch (err) {
         console.log(err);
@@ -86,10 +115,10 @@ exports.payment = async function(req,res){
 }
 
 exports.tester = async function(req,res){
-    // const result = await flw.Subaccount.delete({id:"RS_CDD922C2B0B8FA2660B90A443200120F"})
-    const result = await SubAccount.find()
-    // const result = await SubAccount.findByIdAndDelete("62e9ae019d60b9d218803dbc")
-    // const result = await flw.Subaccount.fetch_all()
+    // const result = await flw.Subaccount.delete({id:"RS_AAF196A5FC01E46D9581F1488754F471"})
+    // const result = await SubAccount.find()
+    // const result = await SubAccount.findByIdAndDelete("62e9aed84cea001d128f5c36")
+    const result = await flw.Subaccount.fetch_all()
     // const result = await flw.Bank.country({country:"GH"})
     console.log(result)
     return res.json(result)

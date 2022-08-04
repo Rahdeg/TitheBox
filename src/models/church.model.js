@@ -1,4 +1,3 @@
-const { array } = require("joi");
 const mongoose = require("mongoose")
 const churchSchema = new mongoose.Schema({
     user_id:{
