@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const {signUp,signIn,update,addIncome,getIncomes,getIncome,updateIncome,forgotPassword,verifyCode,updatepassword,getUserbyid,delete_user,delete_income, getBanks,
-addChurch, getChurches, getChurch, updateChurch, deleteChurch, getChurchAccounts, getChurchAccount} = require("../controllers/user.controllers");
+addChurch, getChurches, getChurch, updateChurch, deleteChurch, getChurchAccounts, getChurchAccount,
+getTransactions, getTransaction} = require("../controllers/user.controllers");
 const {signUpValidation, signInValidation,updateValidation, incomeValidation,updatepasswordvalidation, churchValidation} = require("../validation/user.validations");
 const { payment } = require("../controllers/payment.controller")
 
@@ -20,6 +21,8 @@ router.post('/signIn/forgotPassword',forgotPassword);
 router.post('/signIn/verify',verifyCode)
 router.put('/update/:id', updateValidation, update);
 router.put('/updatepassword/:id', updatepasswordvalidation, updatepassword);
+router.get('/:id/transactions', getTransactions);
+router.get('/:id/transactions/:tran_id', getTransaction);
 router.post('/:id/income',incomeValidation, addIncome);
 router.get('/:id/income', getIncomes);
 router.get('/:id/income/:inc_id', getIncome);

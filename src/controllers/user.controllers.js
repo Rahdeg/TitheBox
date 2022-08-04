@@ -5,6 +5,7 @@ const User = require("../models/user.model").User;
 const { Income } = require("../models/income.model");
 const { Church } = require("../models/church.model");
 const {SubAccount}= require("../models/subAccount.model")
+const {Transaction} = require("../models/transaction.model");
 const {
   sendCode,
   generateCode,
@@ -301,7 +302,6 @@ exports.addChurch = async function (req, res) {
       details.user_id = user.id;
       const account = {accountName:data.accountName, accountNumber:data.accountNumber,bankCode:data.bank.code,subAccountId:subAccountData.subaccount_id,bankName:bankname};
       const subacct = new SubAccount(account);
-      console.log(subacct)
       details.subAccountIds=subacct.id;
       const church = new Church(details);
       subacct.save();
@@ -328,7 +328,7 @@ exports.getChurches = async function (req, res) {
   try {
     const user = User.findById(req.params.id)
     if(!user){
-      return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`});
+      return res.status(404).json({msg:`User with id ${req.params.id} not found`});
     }
     const churches = await Church.find({ user_id: req.params.id });
     return res.status(200).json(churches);
@@ -392,11 +392,11 @@ exports.getChurchAccounts = async function(req,res){
       return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`});
     }else{
       const accounts = church.subAccountIds
-      return res.status(200).json(accounts)
+      return res.status(200).json(accounts);
     }
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({msg:"An Error Occured"})
+    console.log(error);
+    return res.status(500).json({msg:"An Error Occured"});
   }
 }
 
@@ -404,11 +404,47 @@ exports.getChurchAccount = async function(req,res){
   try {
     const account = await SubAccount.findById(req.params.acc_id);
     if(!account){
-      return res.status(404).json({msg:`Church with id ${req.params.church_id} not found`})
+      return res.status(404).json({msg:`Account with id ${req.params.acc_id} not found`});
     }else{
-      return res.status(200).json(account)
+      return res.status(200).json(account);
     }
   } catch (error) {
-    return res.status(500).json({msg:"An Error Occured"})
+    console.log(error);
+    return res.status(500).json({msg:"An Error Occured"});
   }
+}
+
+
+exports.getTransactions = async function(req,res){
+  try {
+    const user = await User.findById(req.params.id);
+    const transactions = await Transaction.find({user_id:req.params.id});
+    if(!user){
+      return res.status(404).json({msg:`User with id ${req.params.tran_id} not found`});
+    }else{
+      return res.status(200).json(transactions);
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({msg:"An Error Occured"});
+  }
+
+}
+
+exports.getTransaction = async function(req,res){
+  try {
+    const user = await User.findById(req.params.id);
+    const transaction = await Transaction.findById(req.params.tran_id);
+    if(!user){
+      return res.status(404).json({msg:`User with id ${req.params.id} not found`});
+    }else if(!transaction){
+      return res.status(404).json({msg:`Transaction with id ${req.params.tran_id} not found`});
+    }else{
+      return res.status(200).json(transaction);
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({msg:"An Error Occured"});
+  }
+
 }
