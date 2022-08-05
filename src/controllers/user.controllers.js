@@ -202,7 +202,11 @@ exports.addIncome = async function (req, res) {
 
 exports.getIncomes = async function (req, res) {
   try {
-    data = await Income.find({ id: req.params.id });
+    const user = await User.findById(req.params.id)
+    if(!user){
+      return res.status(404).json({ msg: `User with ${req.params.id} not found` });
+    }
+    data = await Income.find({ user_id: req.params.id });
     return res.status(200).json(data);
   } catch (error) {
     console.log(error.message);
@@ -212,6 +216,10 @@ exports.getIncomes = async function (req, res) {
 
 exports.getIncome = async function (req, res) {
   try {
+    const user = await User.findById(req.params.id)
+    if(!user){
+      return res.status(404).json({ msg: `User with ${req.params.id} not found` });
+    }
     const data = await Income.findById(req.params.inc_id);
     if (!data) {
       return res.status(404).json({ msg: "Not Found" });
@@ -227,6 +235,10 @@ exports.getIncome = async function (req, res) {
 };
 
 exports.updateIncome = async function (req, res) {
+  const user = await User.findById(req.params.id)
+  if(!user){
+    return res.status(404).json({ msg: `User with ${req.params.id} not found` });
+  }
   const update = req.body;
   Income.findByIdAndUpdate(
     req.params.inc_id,
