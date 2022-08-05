@@ -88,7 +88,7 @@ exports.payment = async function(req,res){
             tx_ref: `${transaction.id}`,
             amount: total_amount,
             currency: currency,
-            redirect_url: `http://localhost:${process.env.PORT}/api/v1/redirect/payment/${transaction.id}`,
+            redirect_url: `http://{localhost:${process.env.PORT}||https://tithebox.herokuapp.com}/api/v1/redirect/payment/${transaction.id}`,
             meta: {
                 consumer_id: req.params.id,
                 consumer_church: church.name
