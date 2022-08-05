@@ -70,6 +70,7 @@ exports.payment = async function(req,res){
         if(!account){
             return res.status(404).json({msg:`Account/SubAccount With ${req.params.acc_id} Not Found`})
         }
+
         const currency = income.currency;
         const amount  = await calculateTithe(req.params.inc_id,req.params.id)
         const charge = await getChargeFee(amount,currency);
@@ -84,11 +85,17 @@ exports.payment = async function(req,res){
         }
         const transaction = Transaction(transactionDetails);
         transaction.save()
+        let redirect_url;
+        if (process.env.ENVIRONMENT == "production") {
+            redirect_url = process.env.PAY_REDIRECT
+        } else if (process.env.ENVIRONMENT == "development") {
+            redirect_url = `http://localhost:${process.env.PORT}/api/v1/redirect/payment/${transaction.id}`
+        }
         const data = {
             tx_ref: `${transaction.id}`,
             amount: total_amount,
             currency: currency,
-            redirect_url: `http://localhost:${process.env.PORT}/api/v1/redirect/payment/${transaction.id}`,
+            redirect_url: redirect_url,
             meta: {
                 consumer_id: req.params.id,
                 consumer_church: church.name
@@ -106,6 +113,7 @@ exports.payment = async function(req,res){
                 }
             ]
         };
+        console.log(data)
         const response = await api.post("/payments",data);
         return res.status(200).json(response.data);
     } catch (err) {
