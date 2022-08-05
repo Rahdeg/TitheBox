@@ -92,7 +92,7 @@ exports.getChargeFee = async function(amount,currency){
 
 }
 
-exports.calculateTithe = async function(income_id,user_id){
+exports.calculateTithe = async function(income_id,user_id,res){
     try {
         const income = await Income.findById(income_id)
         if(income.user_id != user_id){

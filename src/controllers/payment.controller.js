@@ -72,7 +72,7 @@ exports.payment = async function(req,res){
         }
 
         const currency = income.currency;
-        const amount  = await calculateTithe(req.params.inc_id,req.params.id)
+        const amount  = await calculateTithe(req.params.inc_id,req.params.id,res)
         const charge = await getChargeFee(amount,currency);
         const total_amount = amount + charge
         const transactionDetails = {
