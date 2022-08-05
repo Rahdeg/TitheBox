@@ -89,13 +89,13 @@ exports.payment = async function(req,res){
         if (process.env.ENVIRONMENT == "production") {
             redirect_url = process.env.PAY_REDIRECT
         } else if (process.env.ENVIRONMENT == "development") {
-            redirect_url = `http://localhost:${process.env.PORT}/api/v1/redirect/payment/${transaction.id}`
+            redirect_url = `http://localhost:${process.env.PORT}/api/v1/redirect/payment/`
         }
         const data = {
             tx_ref: `${transaction.id}`,
             amount: total_amount,
             currency: currency,
-            redirect_url: redirect_url,
+            redirect_url: redirect_url + `${transaction.id}`,
             meta: {
                 consumer_id: req.params.id,
                 consumer_church: church.name
