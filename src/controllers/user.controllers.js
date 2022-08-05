@@ -10,9 +10,7 @@ const {
   sendCode,
   generateCode,
   senddetails,
-  filterOutPasswordField,
   createSubAccount,
-  updateSubaccount,
 } = require("../utils/functions");
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
@@ -354,7 +352,7 @@ exports.updateChurch = async function (req, res) {
 
   Church.findByIdAndUpdate(
     req.params.inc_id,
-    update,
+    data,
     { new: true },
     (err, data) => {
       if (err) {

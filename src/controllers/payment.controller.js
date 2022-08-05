@@ -89,7 +89,7 @@ exports.payment = async function(req,res){
             tx_ref: `${transaction.id}`,
             amount: total_amount,
             currency: currency,
-            redirect_url: `http://localhost:4000/api/v1/redirect/payment/${transaction.id}`,
+            redirect_url: `http://localhost:${process.env.PORT}/api/v1/redirect/payment/${transaction.id}`,
             meta: {
                 consumer_id: req.params.id,
                 consumer_church: church.name
@@ -116,10 +116,10 @@ exports.payment = async function(req,res){
 }
 
 exports.tester = async function(req,res){
-    // const result = await flw.Subaccount.delete({id:"RS_AAF196A5FC01E46D9581F1488754F471"})
+    const result = await flw.Subaccount.delete({id:"RS_AF5297B94EEF1FFDEE01ABCED6E3582E"})
     // const result = await SubAccount.find()
     // const result = await SubAccount.findByIdAndDelete("62e9aed84cea001d128f5c36")
-    const result = await flw.Subaccount.fetch_all()
+    // const result = await flw.Subaccount.fetch_all()
     // const result = await flw.Bank.country({country:"GH"})
     console.log(result)
     return res.json(result)
