@@ -58,7 +58,6 @@ exports.updateValidation = (req, res, next)=>{
         phoneNumber:Joi.string().min(10).max(22).allow(null),
         occupation:Joi.string().allow(null).default(null),
         city:Joi.string().allow(null).default(null),
-        churches:Joi.array().items(churchSchema),
         country:Joi.string().allow(null).default(null),
         // password:JoiPasswordComplexity(complexityOptions).required(),
     });
