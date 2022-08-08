@@ -123,9 +123,7 @@ exports.createSubAccount= async function(data,user){
             "split_type": "flat",
             "split_value": 20
         }
-
         const response = await flw.Subaccount.create(payload)
-
         return response.data;
     } catch (error) {
         console.log(error)

@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
+const {Church} = require("../models/church.model");
+const {Income} = require("../models/income.model");
 const { senddetails } = require("../utils/functions");
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);

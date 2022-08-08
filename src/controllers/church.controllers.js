@@ -18,6 +18,7 @@ exports.addChurch = async function (req, res) {
     return res.status(404).json({ msg: `No user with id ${req.params.id}` });
   }
   if (!subacct_exists) {
+    console.log("here")
     const subAccountData = await createSubAccount(data, user);
     if (subAccountData) {
       const bankname = subAccountData.bank_name;
@@ -51,6 +52,7 @@ exports.addChurch = async function (req, res) {
       subAccountId: subacct_exists.id,
       bankName: subacct_exists.bankName,
     };
+    console.log("here 3")
     const church = new Church(details);
     church.save();
     return res.status(201).json(church);
