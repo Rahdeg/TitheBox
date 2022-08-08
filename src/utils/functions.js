@@ -124,7 +124,17 @@ exports.createSubAccount= async function(data,user){
             "split_value": 20
         }
         const response = await flw.Subaccount.create(payload)
-        return response.data;
+        if(response.status==="error" && response.message==="A subaccount with the account number and bank already exists"){
+            const subs = await flw.Subaccount.fetch_all()
+            if(subs.status==="success"){
+                let account = subs.data.find((account)=>{
+                    return account.account_number == payload.account_number
+                })
+                return account;
+            }
+        }else{
+            return response.data;
+        }
     } catch (error) {
         console.log(error)
     }

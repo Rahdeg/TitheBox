@@ -18,7 +18,6 @@ exports.addChurch = async function (req, res) {
     return res.status(404).json({ msg: `No user with id ${req.params.id}` });
   }
   if (!subacct_exists) {
-    console.log("here")
     const subAccountData = await createSubAccount(data, user);
     if (subAccountData) {
       const bankname = subAccountData.bank_name;
@@ -78,6 +77,9 @@ exports.getChurches = async function (req, res) {
 exports.getChurch = async function (req, res) {
   try {
     const church = await Church.findById(req.params.church_id);
+    if(!church){
+      return res.status(404).json({ msg: `Church with id ${req.params.church_id} not found` })
+    }
     return res.status(200).json(church);
   } catch (error) {
     res.status(500).json({ msg: "An Error Occured" });
