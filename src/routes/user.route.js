@@ -14,8 +14,10 @@ const {
   updatepasswordvalidation,
 } = require("../validation/user.validations");
 
+const authenticateToken = require('../middlewares/authorization')
+
 router.post("/signUp", signUpValidation, signUp);
-router.post("/signIn", signInValidation, signIn);
+router.post("/signIn", signInValidation,authenticateToken, signIn);
 router.get("/:id", getUserbyid);
 router.delete("/:id", delete_user);
 router.put("/update/:id", updateValidation, update);
