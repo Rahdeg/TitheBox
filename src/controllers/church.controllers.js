@@ -4,7 +4,8 @@ const { SubAccount } = require("../models/subAccount.model");
 const { createSubAccount } = require("../utils/functions");
 
 exports.addChurch = async function (req, res) {
-  const data = req.body;
+  try {
+    const data = req.body;
   const subacct_exists = await SubAccount.findOne({
     accountNumber: data.accountNumber,
   });
@@ -56,6 +57,11 @@ exports.addChurch = async function (req, res) {
     church.save();
     return res.status(201).json(church);
   }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({message:"an error occurred"})
+  }
+  
 };
 
 exports.getChurches = async function (req, res) {

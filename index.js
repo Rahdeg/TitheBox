@@ -24,7 +24,7 @@ app.use(
   transaction_route
 );
 app.use("/api/v1/redirect",redirect_route);
-app.use("api/v1/webhook", webhook_route);
+app.use("api/v1/webhooks", webhook_route);
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome to the api for the tithe box app" });
 });
