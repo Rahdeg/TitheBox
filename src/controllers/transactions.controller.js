@@ -1,6 +1,7 @@
 const { Transaction } = require("../models/transaction.model");
 const Flutterwave = require("flutterwave-node-v3");
 const User = require("../models/user.model").User;
+const {verify_transaction} = require("../utils/functions");
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
 
@@ -13,7 +14,7 @@ exports.getTransactions = async function (req, res) {
     if (!user) {
       return res
         .status(404)
-        .json({ msg: `User with id ${req.params.tran_id} not found` });
+        .json({ msg: `User with id ${req.params.id} not found` });
     } else {
       return res.status(200).json(transactions);
     }
@@ -57,3 +58,20 @@ exports.getBanks = async function (req, res) {
     return res.status(200).json(banks.data);
   }
 };
+
+exports.verifyTransaction = async function(req,res){
+  try {
+    const transaction = await Transaction.findById(req.params.tran_id);
+    if (!transaction){
+      return res.status(404).json({ msg: `Transaction with id ${req.params.tran_id} not found` });
+    }else{
+      
+      const response = await verify_transaction(transaction);
+      return res.status(200).send(response);
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "An Error Occured" });
+  }
+
+}

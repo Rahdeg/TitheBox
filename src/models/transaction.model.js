@@ -5,6 +5,7 @@ const transactionSchema = new mongoose.Schema({
         ref:'Users',
         required:true
     },
+    flw_tran_id:{type:String,default:null},
     income_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Incomes',

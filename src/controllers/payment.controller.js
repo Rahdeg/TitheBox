@@ -35,19 +35,26 @@ exports.paymentSuccessful = async function (req, res) {
         result.data.currency == transaction.currency
       ) {
         transaction.status = "successful";
+        transaction.flw_tran_id = result.data.id;
         transaction.save();
         return res.status(200).json({ msg: "Payment Successful" });
       } else {
-        let transaction = await Transaction.findByIdAndDelete(
-          req.params.tran_id
-        );
+        transaction.status = "failed";
+        transaction.flw_tran_id = result.data.id;
+        transaction.save();
         return res.status(200).json({ msg: "Payment Not Successful" });
       }
     } else if (status === "cancelled") {
-      let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);
+      const transaction = await Transaction.findById(req.params.tran_id);
+      transaction.status = "cancelled";
+      transaction.flw_tran_id = transaction_id;
+      transaction.save();
       return res.status(200).json({ msg: "Payment Cancelled" });
     } else if (status === "failed") {
-      let transaction = await Transaction.findByIdAndDelete(req.params.tran_id);
+      const transaction = await Transaction.findById(req.params.tran_id);
+      transaction.status = "failed";
+      transaction.flw_tran_id = transaction_id;
+      transaction.save();
       return res.status(200).json({ msg: "Payment failed" });
     }
   } catch (error) {
@@ -128,7 +135,6 @@ exports.payment = async function (req, res) {
         },
       ],
     };
-    console.log(data);
     const response = await api.post("/payments", data);
     return res.status(200).json(response.data);
   } catch (err) {
@@ -143,13 +149,36 @@ exports.payment = async function (req, res) {
 };
 
 exports.tester = async function (req, res) {
-  const result = await flw.Subaccount.delete({
-    id: "RS_AF5297B94EEF1FFDEE01ABCED6E3582E",
-  });
+  // const result = await flw.Subaccount.delete({
+  //   id: "RS_AF5297B94EEF1FFDEE01ABCED6E3582E",
+  // });
   // const result = await SubAccount.find()
   // const result = await SubAccount.findByIdAndDelete("62e9aed84cea001d128f5c36")
   // const result = await flw.Subaccount.fetch_all()
   // const result = await flw.Bank.country({country:"GH"})
-  console.log(result);
-  return res.json(result);
+  // console.log(result);
+  try {
+    const payload = {
+        "from": "2022-07-01",
+        "to": "2022-08-12"
+    }
+    const transactions = await Transaction.find()
+    const result = await flw.Transaction.fetch(payload)
+    let data = result.data
+    transactions.forEach((transaction)=>{
+      data.forEach((payment)=>{
+        if(payment.tx_ref==transaction.id){
+          transaction.flw_tran_id = payment.id
+          transaction.status = payment.status
+          transaction.save()
+          console.log(transaction)
+        }
+      })
+    })
+    return res.json(result.data);
+    return res.json(transactions);
+    
+} catch (error) {
+    console.log(error)
+}
 };

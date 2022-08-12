@@ -4,6 +4,7 @@ const {User} = require("../models/user.model");
 const {Church} = require("../models/church.model");
 const {SubAccount} = require("../models/subAccount.model");
 const {Income} = require("../models/income.model");
+const {Transaction} = require("../models/transaction.model");
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB,process.env.FLUTTER_SEC);
 
@@ -141,7 +142,20 @@ exports.createSubAccount= async function(data,user){
     
 }
 
-
+exports.verify_transaction = async function(transaction){
+    try {
+        const payload = {"id":transaction.flw_tran_id};
+        const response = await flw.Transaction.verify(payload);
+        if (response.status==="success"){
+            transaction.status = response.data.status;
+            transaction.save();
+            return transaction;
+        }
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+}
 
 
 // exports. getbankcode = async function(){

@@ -8,6 +8,7 @@ const payment_route = require("./src/routes/payments.route");
 const recovery_route = require("./src/routes/recovery.route");
 const transaction_route = require("./src/routes/transaction.route");
 const redirect_route = require("./src/routes/redirect.route");
+const webhook_route = require("./src/routes/webhook.route");
 
 const app = express();
 connectDatabase(app);
@@ -20,10 +21,10 @@ app.use(
   income_route,
   payment_route,
   recovery_route,
-  transaction_route,
-  redirect_route
+  transaction_route
 );
-
+app.use("/api/v1/redirect",redirect_route);
+app.use("api/v1/webhook", webhook_route);
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome to the api for the tithe box app" });
 });
