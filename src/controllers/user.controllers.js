@@ -4,6 +4,8 @@ const User = require("../models/user.model").User;
 const {Church} = require("../models/church.model");
 const {Income} = require("../models/income.model");
 const { senddetails } = require("../utils/functions");
+const path = require('path')
+const {Userverification} = require ('../models/userverification.model')
 require("dotenv").config();
 const salt = parseInt(process.env.SALT);
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -22,6 +24,7 @@ exports.signUp = async function (req, res) {
       if (hash) {
         data.password = hash;
       }
+      data.verified = false; 
       const user = new User(data);
       user.token = jwt.sign({ id: user.id, email: user.email }, ACCESS_SECRET);
       user.save((error, user) => {
@@ -29,7 +32,7 @@ exports.signUp = async function (req, res) {
           console.log(error);
           return res.status(400).json({ msg: "User Not Saved" });
         } else if (user) {
-          senddetails(data);
+          senddetails(user);
           return res.status(201).json(user);
         }
       });
@@ -41,26 +44,112 @@ exports.signUp = async function (req, res) {
 exports.signIn = async function (req, res) {
   const data = req.body;
   const user = await User.findOne({ email: data.email }).select("+password");
+  //check if user exist
   if (!user) {
     return res.status(404).json({ msg: "Invalid Credentials" });
   } else {
-    bcrypt.compare(data.password, user.password, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ msg: err });
-      }
-      if (!result) {
-        return res.status(400).json({ msg: "Invalid Credentials" });
-      } else {
-        user.token = jwt.sign(
-          { id: user._id, email: user.email },
-          ACCESS_SECRET
-        );
-        return res.status(200).json(user);
-      }
-    });
+    // check if user is verified
+    if (!user.verified) {
+      return res.status(400).json({ msg: "Email has not been Verified" });
+    } else {
+      bcrypt.compare(data.password, user.password, (err, result) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ msg: err });
+        }
+        if (!result) {
+          return res.status(400).json({ msg: "Invalid Credentials" });
+        } else {
+          user.token = jwt.sign(
+            { id: user._id, email: user.email },
+            ACCESS_SECRET
+          );
+          return res.status(200).json(user);
+        }
+      });
+    }
+   
   }
 };
+
+exports.verifyEmail= async (req,res)=>{
+  let {id,string}= req.params;
+  Userverification.find({ user_id: id })
+  .then((result)=>{
+    //user exist
+    if (result.length > 0) {
+      const {expiresAt}=result[0];
+      const hashedString=result[0].uniqueString;
+      //checking for expired link
+      if (expiresAt < Date.now()) {
+        //recored expired so we delete it
+        Userverification.deleteOne({user_id: id })
+        .then(result=>{
+          User.deleteOne({_id: id})
+          .then(()=>{
+            let message= "Link has expired please sign up again";
+            res.redirect(`/users/verified/error=true&message=${message}`); 
+          })
+          .catch(()=>{
+          let message= "Clearing user with expired unique string failed";
+          res.redirect(`/users/verified/error=true&message=${message}`);
+          })
+        }).catch((error)=>{
+          console.log(error)
+          let message= "An error occurred while clearing expired user verification record";
+          res.redirect(`/users/verified/error=true&message=${message}`);
+        })
+      }else{
+        //valid record exist so we validate user
+        //compare hashed uniquestring
+        bcrypt.compare(string,hashedString)
+        .then((result)=>{
+          if (result) {
+            //string matched
+            User.updateOne({_id:id},{verified:true})
+            .then(()=>{
+             Userverification.deleteOne({user_id:id})
+             .then(()=>{
+                res.sendFile(path.join(__dirname,"../views/verified.html"));
+             })
+             .catch((error)=>{
+              console.log(error)
+              let message= `An error occured while finalizing successful verification`;
+              res.redirect(`/users/verified/error=true&message=${message}`);
+             })
+            })
+            .catch((error)=>{
+              console.log(error)
+              let message= `An error occured while updating user record to show verified`;
+              res.redirect(`/users/verified/error=true&message=${message}`);
+            })
+
+          } else {
+            //existing record incorrect verification details passed
+            let message= `Invalid verification details passed.Check your inbox.`;
+          res.redirect(`/users/verified/error=true&message=${message}`);
+          }
+        })
+        .catch(()=>{
+          let message= `An error occured while comparing unique strings`;
+          res.redirect(`/users/verified/error=true&message=${message}`);
+        })
+      }
+    } else {
+    let message= `Account record does'nt exist or has been verified already.Please sign up or log in`;
+    res.redirect(`/users/verified/error=true&message=${message}`);
+    }
+  })
+  .catch((error)=>{
+    console.log(error)
+    let message= "An error occurred while checking for existing user verification records";
+    res.redirect(`/users/verified/error=true&message=${message}`);
+  })
+}
+
+exports.verified= async (req,res)=>{
+  res.sendFile(path.join(__dirname,"../views/verified.html"))
+}
 
 exports.getUserbyid = async (req, res) => {
   User.findById(req.params.id, (err, data) => {

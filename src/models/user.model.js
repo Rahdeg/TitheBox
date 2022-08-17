@@ -10,7 +10,9 @@ const userSchema = new mongoose.Schema({
     country:{type:String, defailt:null},
     password:{type:String, required:true, select:false},
     token:{type:String},
-    code:{type:String}
+    code:{type:String},
+    verified:{type:Boolean}
+
 
 },{
     timestamps:true
