@@ -1,14 +1,10 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require("flutterwave-node-v3");
-const { User } = require("../models/user.model");
-const { Church } = require("../models/church.model");
-const { SubAccount } = require("../models/subAccount.model");
 const { Income } = require("../models/income.model");
 const {Userverification} = require ('../models/userverification.model')
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
 const salt = parseInt(process.env.SALT);
-const { Transaction } = require("../models/transaction.model");
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
 
