@@ -14,7 +14,7 @@ exports.signUpValidation = (req, res, next)=>{
 
     const userSchema = Joi.object({
         firstName:Joi.string().required(),
-        lastName:Joi.string().required(),
+        lastName:Joi.string(),
         phoneNumber:Joi.string().min(10).max(22).allow(null),
         email:Joi.string().min(2).max(255).required().email(),
         occupation:Joi.string().allow(null).default(null),
