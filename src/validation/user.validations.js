@@ -75,8 +75,8 @@ exports.incomeValidation = (req, res, next)=>{
     const incomeSchema = Joi.object({
         type:Joi.string().valid('personal','corporate').required(),
         currency:Joi.string().uppercase().required().valid("NGN","USD","EUR"),
-        businessName:Joi.string().required(),
-        businessAddress:Joi.string().required(),
+        businessName:Joi.string(),
+        businessAddress:Joi.string(),
         amount:Joi.number().required(),
         description:Joi.string().allow(null),
         tithePercentage:Joi.number().min(10).max(100).required(),
