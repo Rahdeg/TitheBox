@@ -213,9 +213,10 @@ exports.verify_transaction = async function (transaction) {
 };
 
 
-exports.transferToChurch = async function(user,account,transaction){
-  const user = User.findById(transaction.user_id);
-  const church = Church.findById(transaction.church)
+exports.transferToChurch = async function(transaction){
+  const user = await User.findById(transaction.user_id);
+  const church = await Church.findById(transaction.church);
+  const account = await SubAccount.findById(transaction.subAccountId)
   const transferData = {
     "account_bank": account.bankCode, //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
     "account_number": account.accountNumber,

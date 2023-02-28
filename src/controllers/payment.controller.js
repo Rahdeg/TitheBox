@@ -104,6 +104,7 @@ exports.payment = async function (req, res) {
       church: church.id,
       tithePercentage: income.tithePercentage,
       currency: income.currency,
+      subAccountId: account.id
     };
     const transaction = Transaction(transactionDetails);
     transaction.save();

@@ -19,7 +19,10 @@ const transactionSchema = new mongoose.Schema({
     },
     tithePercentage:{type:Number, required:true},
     currency:{type:String,required:true},
-    status:{type:String, default:"pending"}
+    status:{type:String, default:"pending"},
+    subAccountId:{
+        type:String
+    }
 },{
     timestamps:true
 });
