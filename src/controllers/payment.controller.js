@@ -190,16 +190,11 @@ exports.tester2 = async function (req, res) {
     const transaction_id = req.params.tran_id
     const payload = {}
     const transaction = await Transaction.findById(transaction_id);
+    if(!transaction){
+      return res.status(404).json({message:"Transaction Not Found"})
+    }
     const result = await flw.Transaction.fetch(payload)
     let data = result.data
-    data.forEach((payment)=>{
-      if(payment.tx_ref==transaction.id){
-        transaction.flw_tran_id = payment.id
-        transaction.status = payment.status
-        transaction.save()
-        console.log(transaction)
-      }
-    })
     data = data.filter((payment)=>{
       if(payment.tx_ref==transaction.id){
         return payment;

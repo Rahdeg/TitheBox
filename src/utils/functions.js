@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const salt = parseInt(process.env.SALT);
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
+const { Transaction } = require("../models/transaction.model");
 
 exports.sendCode = function (email, code) {
   mailOptions = {
@@ -166,13 +167,40 @@ exports.createSubAccount = async function (data, user) {
   }
 };
 
+// exports.verify_transaction = async function (transaction) {
+//   try {
+//     const payload = { id: transaction.flw_tran_id };
+//     const response = await flw.Transaction.verify(payload);
+//     if (response.status === "success") {
+//       transaction.status = response.data.status;
+//       transaction.save();
+//       return transaction;
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     return error;
+//   }
+// };
+
+
 exports.verify_transaction = async function (transaction) {
   try {
-    const payload = { id: transaction.flw_tran_id };
+    let payload = {}
+    const result = await flw.Transaction.fetch(payload)
+    let data = result.data
+    data = data.filter((payment)=>{
+      if(payment.tx_ref==transaction.id){
+        return payment;
+      }
+    })
+    transaction = data[0];
+    payload = { id: transaction.id };
     const response = await flw.Transaction.verify(payload);
     if (response.status === "success") {
       transaction.status = response.data.status;
       transaction.save();
+      return transaction;
+    }else{
       return transaction;
     }
   } catch (error) {
@@ -180,4 +208,3 @@ exports.verify_transaction = async function (transaction) {
     return error;
   }
 };
-
