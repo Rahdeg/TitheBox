@@ -183,3 +183,31 @@ exports.tester = async function (req, res) {
     console.log(error)
 }
 };
+
+
+exports.tester2 = async function (req, res) {
+  try {
+    const transaction_id = req.params.tran_id
+    const payload = {}
+    const transaction = await Transaction.findById(transaction_id);
+    const result = await flw.Transaction.fetch(payload)
+    let data = result.data
+    data.forEach((payment)=>{
+      if(payment.tx_ref==transaction.id){
+        transaction.flw_tran_id = payment.id
+        transaction.status = payment.status
+        transaction.save()
+        console.log(transaction)
+      }
+    })
+    data = data.filter((payment)=>{
+      if(payment.tx_ref==transaction.id){
+        return payment;
+      }
+    })
+    return res.json(data);
+    
+} catch (error) {
+    console.log(error)
+}
+};
