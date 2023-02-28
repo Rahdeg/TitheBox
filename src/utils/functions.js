@@ -1,13 +1,16 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require("flutterwave-node-v3");
 const { Income } = require("../models/income.model");
+const { Transaction } = require("../models/transaction.model");
+const { User } = require("../models/user.model");
+const { SubAccount } = require("../models/subAccount.model");
+const { Church } = require("../models/church.model");
 const {Userverification} = require ('../models/userverification.model')
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
 const salt = parseInt(process.env.SALT);
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
-const { Transaction } = require("../models/transaction.model");
 
 exports.sendCode = function (email, code) {
   mailOptions = {
@@ -208,3 +211,21 @@ exports.verify_transaction = async function (transaction) {
     return error;
   }
 };
+
+
+exports.transferToChurch = async function(user,account,transaction){
+  const user = User.findById(transaction.user_id);
+  const church = Church.findById(transaction.church)
+  const transferData = {
+    "account_bank": account.bankCode, //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
+    "account_number": account.accountNumber,
+    "amount": transaction.amount,
+    "email" : user.email,
+    "narration": `Transfer from ${user.email} for ${church.name}`,
+    "currency": transaction.currency,
+    "reference": `${transaction.id}`, //This is a merchant's unique reference for the transfer, it can be used to query 
+}
+const transferResponse = await api.post("/transfers", transferData);
+console.log('transferdata',transferResponse.data);
+return transferResponse;
+}

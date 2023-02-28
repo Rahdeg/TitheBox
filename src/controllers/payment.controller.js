@@ -134,7 +134,7 @@ exports.payment = async function (req, res) {
       const paymentsLink = paymentResponse.data;
       const paymentsRef = paymentResponse.data.data.link;
       //return payment link to client
-      res.status(200).json(paymentsLink);
+      return res.status(200).json(paymentsLink);
       // wait for the payment to be successful
       // const paymenter = await new Promise((resolve,reject)=>{
       //   Flutterwave.Events.on('payment.success',(data)=>{
@@ -143,18 +143,6 @@ exports.payment = async function (req, res) {
       //     }
       //   })
       // })
-
-      const transferData = {
-        "account_bank": account.bankCode, //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
-        "account_number": account.accountNumber,
-        "amount": total_amount,
-        "email" : user.email,
-        "narration": `Transfer from ${user.email} for ${church.name}`,
-        "currency": currency,
-        "reference": `${transaction.id}`, //This is a merchant's unique reference for the transfer, it can be used to query 
-    }
-    const transferResponse = await api.post("/transfers", transferData);
-    console.log('transferdata',transferResponse.data);
     
   } catch (err) {
     console.log(err);
@@ -196,30 +184,6 @@ exports.tester = async function (req, res) {
       })
     })
     return res.json(result.data);
-    return res.json(transactions);
-    
-} catch (error) {
-    console.log(error)
-}
-};
-
-
-exports.tester2 = async function (req, res) {
-  try {
-    const transaction_id = req.params.tran_id
-    const payload = {}
-    const transaction = await Transaction.findById(transaction_id);
-    if(!transaction){
-      return res.status(404).json({message:"Transaction Not Found"})
-    }
-    const result = await flw.Transaction.fetch(payload)
-    let data = result.data
-    data = data.filter((payment)=>{
-      if(payment.tx_ref==transaction.id){
-        return payment;
-      }
-    })
-    return res.json(data);
     
 } catch (error) {
     console.log(error)
