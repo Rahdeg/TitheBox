@@ -158,10 +158,11 @@ exports.tester = async function (req, res) {
   // const result = await flw.Bank.country({country:"GH"})
   // console.log(result);
   try {
-    const payload = {
-        "from": "2022-07-01",
-        "to": "2022-08-12"
-    }
+    // const payload = {
+    //     "from": "2022-07-01",
+    //     "to": "2022-08-12"
+    // }
+    const payload = {}
     const transactions = await Transaction.find()
     const result = await flw.Transaction.fetch(payload)
     let data = result.data
