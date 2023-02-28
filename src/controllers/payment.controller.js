@@ -95,8 +95,8 @@ exports.payment = async function (req, res) {
 
     const currency = income.currency;
     const amount = await calculateTithe(req.params.inc_id, req.params.id, res);
-    const charge = await getChargeFee(amount, currency);
-    const total_amount = amount + charge;
+    // const charge = await getChargeFee(amount, currency);
+    const total_amount = amount 
     const transactionDetails = {
       user_id: user.id,
       income_id: income.id,
@@ -113,30 +113,49 @@ exports.payment = async function (req, res) {
     } else if (process.env.ENVIRONMENT == "development") {
       redirect_url = `http://localhost:${process.env.PORT}/api/v1/redirect/payment/`;
     }
-    const data = {
-      tx_ref: `${transaction.id}`,
-      amount: total_amount,
-      currency: currency,
-      redirect_url: redirect_url + `${transaction.id}`,
-      meta: {
-        consumer_id: req.params.id,
-        consumer_church: church.name,
-      },
-      customer: {
-        email: user.email,
-        phonenumber: user.phoneNumber,
-        name: `${user.firstName} ${user.lastName}`,
-      },
-      subaccounts: [
-        {
-          id: account.subAccountId,
-          transaction_charge_type: "flat",
-          transaction_charge: charge,
+
+      //1. Create a payment link 
+      const paymentDetails = {
+        tx_ref: `${transaction.id}`,
+        amount: total_amount,
+        currency: currency,
+        redirect_url: redirect_url + `${transaction.id}`,
+        meta: {
+          consumer_id: req.params.id,
+          consumer_church: church.name,
         },
-      ],
-    };
-    const response = await api.post("/payments", data);
-    return res.status(200).json(response.data);
+        customer: {
+          email: user.email,
+          phonenumber: user.phoneNumber,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      };
+      const paymentResponse = await api.post("/payments", paymentDetails);
+      const paymentsLink = paymentResponse.data;
+      const paymentsRef = paymentResponse.data.data.link;
+      //return payment link to client
+      res.status(200).json(paymentsLink);
+      // wait for the payment to be successful
+      // const paymenter = await new Promise((resolve,reject)=>{
+      //   Flutterwave.Events.on('payment.success',(data)=>{
+      //     if(data.tx_ref === paymentsRef){
+      //       resolve(data);
+      //     }
+      //   })
+      // })
+
+      const transferData = {
+        "account_bank": account.bankCode, //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
+        "account_number": account.accountNumber,
+        "amount": total_amount,
+        "email" : user.email,
+        "narration": `Transfer from ${user.email} for ${church.name}`,
+        "currency": currency,
+        "reference": `${transaction.id}`, //This is a merchant's unique reference for the transfer, it can be used to query 
+    }
+    const transferResponse = await api.post("/transfers", transferData);
+    console.log('transferdata',transferResponse.data);
+    
   } catch (err) {
     console.log(err);
     return res
