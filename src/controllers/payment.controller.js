@@ -38,7 +38,7 @@ exports.paymentSuccessful = async function (req, res) {
         transaction.status = "successful";
         transaction.flw_tran_id = result.data.id;
         transaction.save();
-        // transferToChurch(transaction);
+        await transferToChurch(transaction);
         return res.status(200).json({ msg: "Payment Successful" });
       } else {
         transaction.status = "failed";
@@ -49,7 +49,7 @@ exports.paymentSuccessful = async function (req, res) {
     } else if (status === "cancelled") {
       const transaction = await Transaction.findById(req.params.tran_id);
       transaction.status = "cancelled";
-      transaction.flw_tran_id = transaction_id;
+      transaction.flw_tran_id = flutter_transaction_id;
       transaction.save();
       return res.status(200).json({ msg: "Payment Cancelled" });
     } else if (status === "failed") {
