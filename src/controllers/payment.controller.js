@@ -4,6 +4,7 @@ const {
   getChargeFee,
   calculateTithe,
   createSubAccount,
+  transferToChurch
 } = require("../utils/functions");
 const { User } = require("../models/user.model");
 const { SubAccount } = require("../models/subAccount.model");
@@ -23,12 +24,12 @@ exports.paymentSuccessful = async function (req, res) {
   const status = req.query.status;
   try {
     if (status === "successful") {
-      const transaction_id = req.query.transaction_id;
+      const flutter_transaction_id = req.query.transaction_id;
       const tx_ref = req.query.tx_ref;
-      const result = await flw.Transaction.verify({ id: transaction_id });
+      const result = await flw.Transaction.verify({ id: flutter_transaction_id });
       const transaction = await Transaction.findById(tx_ref);
       let fee = await getChargeFee(transaction.amount, result.data.currency);
-      let amount = transaction.amount + fee;
+      let amount = transaction.amount;
       if (
         result.data.status == "successful" &&
         result.data.amount == amount &&
@@ -37,6 +38,7 @@ exports.paymentSuccessful = async function (req, res) {
         transaction.status = "successful";
         transaction.flw_tran_id = result.data.id;
         transaction.save();
+        // transferToChurch(transaction);
         return res.status(200).json({ msg: "Payment Successful" });
       } else {
         transaction.status = "failed";
@@ -53,7 +55,7 @@ exports.paymentSuccessful = async function (req, res) {
     } else if (status === "failed") {
       const transaction = await Transaction.findById(req.params.tran_id);
       transaction.status = "failed";
-      transaction.flw_tran_id = transaction_id;
+      transaction.flw_tran_id = flutter_transaction_id;
       transaction.save();
       return res.status(200).json({ msg: "Payment failed" });
     }
