@@ -9,11 +9,13 @@ const recovery_route = require("./src/routes/recovery.route");
 const transaction_route = require("./src/routes/transaction.route");
 const redirect_route = require("./src/routes/redirect.route");
 const webhook_route = require("./src/routes/webhook.route");
+const Errormiddleware = require("./src/middlewares/errormiddleware")
 
 const app = express();
 connectDatabase(app);
 app.use(cors());
 app.use(express.json());
+
 app.use(
   "/api/v1/users",
   user_route,
@@ -35,3 +37,5 @@ app.all("*", (req, res) => {
     messsage: "Oops! you've hit an invalid route.",
   });
 });
+
+app.use(Errormiddleware);

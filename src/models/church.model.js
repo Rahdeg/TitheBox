@@ -5,10 +5,17 @@ const churchSchema = new mongoose.Schema({
         ref:'Users',
         required:true
     },
-    name:{type:String, required:true},
-    serviceDays:[{type:String,required:true}],
-    address:{type:String,required:true, default:null},
-    subAccountIds:[{type:mongoose.Schema.Types.ObjectId, ref:'SubAccounts', default:null}]
+    name:{type:String, required:[true, "Please add a name"]},
+    serviceDays:[{type:String,required:[true, "Please add a service day"]}],
+    address:{type:String,required:[true, "Please add an address"], default:null},
+    accountName:{type:String,required:[true, "Please add an account name"]},
+    accountNumber:{type:String,required:[true, "Please add an account number"]},
+    country:{type:String,required:[true, "Please add a country"]},
+    bank:{
+        code:{type:String,required:[true, "Please add a bank code"]},
+        name:{type:String,required:[true, "Please add a bank name"]},
+    },
+    
 })
 
 exports.Church = mongoose.model('Church',churchSchema);

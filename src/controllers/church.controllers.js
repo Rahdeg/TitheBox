@@ -1,7 +1,7 @@
 const User = require("../models/user.model").User;
 const { Church } = require("../models/church.model");
-const { SubAccount } = require("../models/subAccount.model");
-const { createSubAccount } = require("../utils/functions");
+const AsyncManager = require("../utils/asyncManager");
+
 
 exports.addChurch = async function (req, res) {
   try {
