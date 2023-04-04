@@ -1,22 +1,25 @@
 const { Income } = require("../models/income.model");
 const User = require("../models/user.model").User;
+const AsyncManager = require("../utils/asyncManager");
+const LibraryError = require("../utils/libraryError");
 
-exports.addIncome = async function (req, res) {
-  const data = req.body;
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-    }
-    data.user_id = user.id;
-    const income = new Income(data);
-    income.save();
+
+exports.addIncome =AsyncManager( async function (req, res,next) {
+    const data = req.body;
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+      }
+      data.user_id = user.id;
+      const income = await Income.create(data);
     return res.status(201).json(income);
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ msg: error });
+      
+    } catch (error) {
+      return next(new LibraryError(error.message, 500));
+    }
   }
-};
+) 
 
 exports.getIncomes = async function (req, res) {
   try {

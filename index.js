@@ -6,6 +6,7 @@ const church_route = require("./src/routes/church.route");
 const income_route = require("./src/routes/income.route");
 const payment_route = require("./src/routes/payments.route");
 const recovery_route = require("./src/routes/recovery.route");
+const walett_route = require("./src/routes/walett.route");
 const transaction_route = require("./src/routes/transaction.route");
 const redirect_route = require("./src/routes/redirect.route");
 const webhook_route = require("./src/routes/webhook.route");
@@ -23,7 +24,8 @@ app.use(
   income_route,
   payment_route,
   recovery_route,
-  transaction_route
+  transaction_route,
+  walett_route
 );
 app.use("/api/v1/redirect",redirect_route);
 app.use("api/v1/webhooks", webhook_route);

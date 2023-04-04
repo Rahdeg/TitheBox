@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const incomeSchema = new mongoose.Schema({
+const walettSchema = new mongoose.Schema({
     user_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Users',
@@ -17,4 +17,4 @@ const incomeSchema = new mongoose.Schema({
     timestamps:true
 })
 
-exports.Income = mongoose.model('Incomes', incomeSchema)
+exports.Walett = mongoose.model('Waletts', walettSchema)

@@ -9,10 +9,7 @@ const {
 } = require("../controllers/income.controllers");
 const authenticateToken = require('../middlewares/authorization')
 
-router.post("/:id/income", incomeValidation,authenticateToken, addIncome);
-router.get("/:id/income",authenticateToken, getIncomes);
-router.get("/:id/income/:inc_id",authenticateToken, getIncome);
-router.put("/:id/income/:inc_id",authenticateToken, updateIncome);
-router.delete("/:id/income/:inc_id",authenticateToken, delete_income);
+router.post("/:id/income",authenticateToken, addIncome).get(authenticateToken, getIncomes);
+router.get("/:id/income/:inc_id",authenticateToken, getIncome).put(authenticateToken, updateIncome).delete(authenticateToken, delete_income);
 
 module.exports = router;
