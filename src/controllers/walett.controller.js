@@ -161,3 +161,47 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
       return next(new LibraryError(error.message, 404));
   }
 })
+
+exports.otherTransfers=AsyncManager(async(req,res,next)=>{
+  try {
+      const user = await User.findById(req.params.id);
+      const church = await Church.findById(req.params.church_id);
+      const income = await Income.findById(req.params.income_id);
+      const walett = await Walett.findById(req.params.walett_id);
+
+  if (!user) {
+          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+        }
+
+  if (!church) {
+          return res.status(404).json({ msg: `No church with id ${req.params.church_id}` });
+        }
+
+        if (!income) {
+          return res.status(404).json({ msg: `No income with id ${req.params.income_id}` });
+        }
+
+  if (!walett) {
+          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
+        }
+
+    const data = req.body;
+  
+    const transferData={
+    "account_bank": church.bank.code, 
+    "account_number": church.accountNumber,
+    "amount": data.amount,
+    "email" : user.email,
+    "narration": data.narration,
+    "currency": income.currency,
+    "debit_subaccount":walett.accountReference, 
+    }
+    
+    const transferResponse = await api.post("/transfers", transferData);
+      return res.status(200).json(transferResponse.data);
+        
+  } catch (error) {
+      console.log(error)
+      return next(new LibraryError(error.message, 404));
+  }
+})

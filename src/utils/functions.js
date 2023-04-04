@@ -94,9 +94,9 @@ exports.senddetails =async function (user) {
 
   if ( verification.expiresAt > Date.now()) {
     // token is still valid, send email with existing token
-    console.log("here")
+    console.log("token still fresh")
     try {
-      mmailOptions = {
+      mailOptions = {
         from: process.env.AUTH_EMAIL,
         to: user.email,
         subject: "Verify Your Email",
@@ -107,9 +107,9 @@ exports.senddetails =async function (user) {
             <p>This link <b>expires in 15mins</b></p><p>click <a href=${currentUrl + "users/verify/" + user.id + "/" + verification.uniqueString}>here</a> to proceed</p>`,  
       };
 
-      console.log(mmailOptions);
 
-      return Transport.sendMail(mmailOptions, function (error, response) {
+
+      return Transport.sendMail(mailOptions, function (error, response) {
         if (error) {
           console.log(error);
           return { status: "Error", msg: "Email Not Sent" };
@@ -232,3 +232,4 @@ exports.transferToChurch = async function(church,user,walett,amount,income){
 const transferResponse = await api.post("/transfers", transferData);
 return transferResponse;
 }
+

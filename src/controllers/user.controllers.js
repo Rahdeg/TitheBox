@@ -157,7 +157,10 @@ exports.revalidate= async (req,res)=>{
   try {
     const {email} = req.body;
   const user = await User.findOne({ email });
-
+ 
+if (user.verified) {
+  return res.status(404).json({ msg: ` user with email ${email} as been verified` });
+}
   revalidateAccount(user);
   
   } catch (error) {
