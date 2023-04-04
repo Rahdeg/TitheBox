@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model").User;
 const {Church} = require("../models/church.model");
 const {Income} = require("../models/income.model");
-const { senddetails } = require("../utils/functions");
+const { senddetails, revalidateAccount } = require("../utils/functions");
 const path = require('path')
 const {Userverification} = require ('../models/userverification.model')
 require("dotenv").config();
@@ -83,22 +83,28 @@ exports.verifyEmail= async (req,res)=>{
       //checking for expired link
       if (expiresAt < Date.now()) {
         //recored expired so we delete it
-        Userverification.deleteOne({user_id: id })
-        .then(result=>{
-          User.deleteOne({_id: id})
-          .then(()=>{
-            let message= "Link has expired please sign up again";
-            res.redirect(`/users/verified/error=true&message=${message}`); 
-          })
-          .catch(()=>{
-          let message= "Clearing user with expired unique string failed";
-          res.redirect(`/users/verified/error=true&message=${message}`);
-          })
-        }).catch((error)=>{
-          console.log(error)
-          let message= "An error occurred while clearing expired user verification record";
-          res.redirect(`/users/verified/error=true&message=${message}`);
-        })
+        // Userverification.deleteOne({user_id: id })
+        // .then(result=>{
+        //   User.deleteOne({_id: id})
+        //   .then(()=>{
+        //     let message= "Link has expired please sign up again";
+        //     res.redirect(`/users/verified/error=true&message=${message}`); 
+        //   })
+        //   .catch(()=>{
+        //   let message= "Clearing user with expired unique string failed";
+        //   res.redirect(`/users/verified/error=true&message=${message}`);
+        //   })
+        // }).catch((error)=>{
+        //   console.log(error)
+        //   let message= "An error occurred while clearing expired user verification record";
+        //   res.redirect(`/users/verified/error=true&message=${message}`);
+        // })
+        console.log("Verification Expired Please revalidate using your email" )
+        let message= "Verification Expired Please revalidate using your email";
+        res.redirect(`/users/verified/error=true&message=${message}`); 
+        
+        
+        
       }else{
         //valid record exist so we validate user
         //compare hashed uniquestring
@@ -146,6 +152,22 @@ exports.verifyEmail= async (req,res)=>{
     res.redirect(`/users/verified/error=true&message=${message}`);
   })
 }
+
+exports.revalidate= async (req,res)=>{
+  try {
+    const {email} = req.body;
+  const user = await User.findOne({ email });
+
+  revalidateAccount(user);
+  
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+  
+}
+
+
+
 
 exports.verified= async (req,res)=>{
   res.sendFile(path.join(__dirname,"../views/verified.html"))

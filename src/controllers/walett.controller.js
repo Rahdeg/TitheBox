@@ -4,6 +4,9 @@ const { User } = require("../models/user.model");
 const AsyncManager = require("../utils/asyncManager");
 const LibraryError = require("../utils/libraryError");
 const {Walett  } = require("../models/walett.model");
+const { Church } = require("../models/church.model");
+const { Income } = require("../models/income.model");
+const { calculateTithe, getChargeFee, transferToChurch } = require("../utils/functions");
 
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
@@ -54,3 +57,107 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
 })
 
 
+exports.getWalett=AsyncManager(async(req,res,next)=>{
+  try {
+      const user = await User.findById(req.params.id);
+      const walett = await Walett.findById(req.params.walett_id);
+
+  if (!user) {
+          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+        }
+
+  if (!walett) {
+          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
+        }
+        
+        const walettDetails = await Walett.find({user_id: req.params.id});
+
+        return res.status(200).json(walettDetails);
+        
+  } catch (error) {
+      console.log(error)
+      return next(new LibraryError(error.message, 404));
+  }
+})
+
+exports.getWalettTransactions=AsyncManager(async(req,res,next)=>{
+  try {
+      const user = await User.findById(req.params.id);
+      const walett = await Walett.findById(req.params.walett_id);
+
+  if (!user) {
+          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+        }
+
+  if (!walett) {
+          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
+        }
+        
+        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/transactions`);
+
+        return res.status(200).json(response.data);
+        
+  } catch (error) {
+      console.log(error)
+      return next(new LibraryError(error.message, 404));
+  }
+})
+
+exports.getWalettBalance=AsyncManager(async(req,res,next)=>{
+  try {
+      const user = await User.findById(req.params.id);
+      const walett = await Walett.findById(req.params.walett_id);
+
+  if (!user) {
+          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+        }
+
+  if (!walett) {
+          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
+        }
+        
+        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
+
+        return res.status(200).json(response.data);
+        
+  } catch (error) {
+      console.log(error)
+      return next(new LibraryError(error.message, 404));
+  }
+})
+
+exports.payTithe=AsyncManager(async(req,res,next)=>{
+  try {
+      const user = await User.findById(req.params.id);
+      const church = await Church.findById(req.params.church_id);
+      const income = await Income.findById(req.params.income_id);
+      const walett = await Walett.findById(req.params.walett_id);
+
+  if (!user) {
+          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+        }
+
+        if (!church) {
+          return res.status(404).json({ msg: `No church with id ${req.params.church_id}` });
+        }
+
+        if (!income) {
+          return res.status(404).json({ msg: `No income with id ${req.params.income_id}` });
+        }
+
+  if (!walett) {
+          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
+        }
+
+    const amount = await calculateTithe(req.params.income_id, req.params.id, res);
+    // const charge = await getChargeFee(amount, currency);
+    // const total_amount = amount + charge;
+        
+      const transfer = await  transferToChurch(church,user,walett,amount,income);
+      return res.status(200).json(transfer.data);
+        
+  } catch (error) {
+      console.log(error)
+      return next(new LibraryError(error.message, 404));
+  }
+})
