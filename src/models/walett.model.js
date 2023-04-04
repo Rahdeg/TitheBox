@@ -5,14 +5,17 @@ const walettSchema = new mongoose.Schema({
         ref:'Users',
         required:true
     },
-    type:{type:String, required:[true, "Please add an income type"]},
-    currency:{type:String, required:[true, "Please add a currency"]},
-    businessName:{type:String, required:[true, "Please add a business name"]},
-    businessAddress:{type:String, required:[true, "Please add a business address"]},
-    amount:{type:Number, required:[true, "Please add an income amount"]},
-    description:{type:String, default:null},
-    tithePercentage:{type:Number, min:10, max:100, required:[true, "Please add tithe percentage"]},
-    frequency:{type:String, required:[true, "Please income frequency"]},
+    id:{type:String, required:[true, "Please add an id"]},
+    accountReference:{type:String, required:[true, "Please add a reference"]},
+    accountName:{type:String, required:[true, "Please add a account name"]},
+    barterId:{type:String, required:[true, "Please add a barterId"]},
+    email:{type:Number, required:[true, "Please add an barterId"]},
+    mobileNumber:{type:String, required:[true, "Please add a mobileNumber"]},
+    nuban:{type:String, required:[true, "Please add a nuban"]},
+    bankName:{type:Number, required:[true, "Please add a bankName"]},
+    bankCode:{type:String, required:[true, "Please add a bankCode"]},
+    status:{type:String, required:[true, "Please add a status"]},
+    
 },{
     timestamps:true
 })
