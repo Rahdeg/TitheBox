@@ -11,3 +11,16 @@ Authenticate users using JWT tokens
 Validate user inputs using Joi
 
 Integrate with Flutterwave for payment processing
+
+
+# Acknowledgements
+
+Node.js
+
+Joi
+
+jsonwebtoken
+
+Express
+
+Flutterwave
