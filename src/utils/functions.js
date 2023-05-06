@@ -36,6 +36,7 @@ exports.senddetails =async function (user) {
   const currentUrl = process.env.CURRENT_URL;
   const uniqueString = uuidv4() + user.id;
   const verification = await Userverification.findOne({ user_id :user.id});
+  
   mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: user.email,
@@ -53,7 +54,7 @@ exports.senddetails =async function (user) {
         const Verified= new Userverification({
             user_id:user.id,
             uniqueString:hashedstring,
-            expiresAt: Date.now() + 900000,
+            expiresAt: Date.now() + 10000,
         });
         Verified.save()
         .then(()=>{
@@ -90,50 +91,14 @@ exports.senddetails =async function (user) {
   if (!verification) {
     console.log("no user found")
     return;
-  }
-
-  if ( verification.expiresAt > Date.now()) {
-    // token is still valid, send email with existing token
-    console.log("token still fresh")
-    try {
-      mailOptions = {
-        from: process.env.AUTH_EMAIL,
-        to: user.email,
-        subject: "Verify Your Email",
-        html: 
-            `<p>
-              Verify your email to complete the signup and login into your account.
-            </p>
-            <p>This link <b>expires in 15mins</b></p><p>click <a href=${currentUrl + "users/verify/" + user.id + "/" + verification.uniqueString}>here</a> to proceed</p>`,  
-      };
-
-
-
-      return Transport.sendMail(mailOptions, function (error, response) {
-        if (error) {
-          console.log(error);
-          return { status: "Error", msg: "Email Not Sent" };
-        } else {
-          console.log("Email Sent Successfully");
-          return { status: "Pending", msg: " Verification Email Sent Successfully" };
-        }
-      });
-     
-    } catch (error) {
-      return { status: "Error", msg: "Email Not Sent" };
-    }
-   
-    
-  } else {
-    //token has expired
-    
-    const uniqueString = uuidv4() + user.id;
+  }   
     const currentUrl = process.env.CURRENT_URL;
-    const hashstring=await bcrypt
-    .hash(uniqueString,salt);
-    verification.uniqueString=hashstring;
-    verification.expiresAt =Date.now() + 900000;
-    await verification.save();
+    const uniqueString = uuidv4() + user.id;
+    
+    bcrypt.hash(uniqueString,salt).then((hashedstring)=>{
+      verification.uniqueString=hashedstring;
+    verification.expiresAt =Date.now() + 50000;
+    verification.save();
 
     newMailOptions = {
       from: process.env.AUTH_EMAIL,
@@ -143,7 +108,7 @@ exports.senddetails =async function (user) {
           `<p>
             Verify your email to complete the signup and login into your account.
           </p>
-          <p>This link <b>expires in 15mins</b></p><p>click <a href=${currentUrl + "users/verify/" + user.id + "/" + verification.uniqueString}>here</a> to proceed</p>`,  
+          <p>This link <b>expires in 15mins</b></p><p>click <a href=${currentUrl + "users/verify/" + user.id + "/" + uniqueString}>here</a> to proceed</p>`,  
     };
 
    return  Transport.sendMail(newMailOptions, function (error, response) {
@@ -155,9 +120,13 @@ exports.senddetails =async function (user) {
         return { status: "Pending", msg: " Verification Email Sent Successfully" };
       }
     });
-
-
-  }
+    }).catch(()=>{
+        res.json({
+            status:"Failed",
+            message:"An error occured while hashing"
+        })
+    })
+    
 };
 
 

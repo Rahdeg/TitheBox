@@ -82,7 +82,7 @@ exports.verifyEmail= async (req,res)=>{
       const hashedString=result[0].uniqueString;
       //checking for expired link
       if (expiresAt < Date.now()) {
-        //recored expired so we delete it
+        //recored expired 
         // Userverification.deleteOne({user_id: id })
         // .then(result=>{
         //   User.deleteOne({_id: id})
@@ -101,9 +101,7 @@ exports.verifyEmail= async (req,res)=>{
         // })
         console.log("Verification Expired Please revalidate using your email" )
         let message= "Verification Expired Please revalidate using your email";
-        res.redirect(`/users/verified/error=true&message=${message}`); 
-        
-        
+        res.redirect(`/users/verified/error=true&message=${message}`) 
         
       }else{
         //valid record exist so we validate user
@@ -143,7 +141,7 @@ exports.verifyEmail= async (req,res)=>{
       }
     } else {
     let message= `Account record does'nt exist or has been verified already.Please sign up or log in`;
-    res.redirect(`/users/verified/error=true&message=${message}`);
+    res.redirect(`/users/verified/error=true&message=${message}`)
     }
   })
   .catch((error)=>{
@@ -161,7 +159,8 @@ exports.revalidate= async (req,res)=>{
 if (user.verified) {
   return res.status(404).json({ msg: ` user with email ${email} as been verified` });
 }
-  revalidateAccount(user);
+   revalidateAccount(user);
+   return res.status(404).json({ msg: 'Verification mail sent successfully' });
   
   } catch (error) {
     return res.status(400).json(error);
@@ -175,6 +174,8 @@ if (user.verified) {
 exports.verified= async (req,res)=>{
   res.sendFile(path.join(__dirname,"../views/verified.html"))
 }
+
+
 
 exports.getUserbyid = async (req, res) => {
   User.findById(req.params.id, (err, data) => {
