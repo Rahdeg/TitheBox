@@ -1,12 +1,18 @@
 const Transport = require("../verification/nodemailer");
 const Flutterwave = require("flutterwave-node-v3");
 const { Income } = require("../models/income.model");
+const axios = require("axios");
 const {Userverification} = require ('../models/userverification.model')
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
 const salt = parseInt(process.env.SALT);
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
+
+const api = axios.create({
+  baseURL: "https://api.flutterwave.com/v3",
+  headers: { Authorization: `Bearer ${process.env.FLUTTER_SEC}` },
+});
 
 exports.sendCode = function (email, code) {
   mailOptions = {
@@ -25,9 +31,12 @@ exports.sendCode = function (email, code) {
     }
   });
 };
-exports.senddetails = function (user) {
+
+exports.senddetails =async function (user) {
   const currentUrl = process.env.CURRENT_URL;
   const uniqueString = uuidv4() + user.id;
+  const verification = await Userverification.findOne({ user_id :user.id});
+  
   mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: user.email,
@@ -45,7 +54,7 @@ exports.senddetails = function (user) {
         const Verified= new Userverification({
             user_id:user.id,
             uniqueString:hashedstring,
-            expiresAt: Date.now() + 900000,
+            expiresAt: Date.now() + 10000,
         });
         Verified.save()
         .then(()=>{
@@ -75,6 +84,51 @@ exports.senddetails = function (user) {
     })
     
 };
+
+ exports.revalidateAccount = async (user) => {
+  const verification = await Userverification.findOne({ user_id :user.id});
+
+  if (!verification) {
+    console.log("no user found")
+    return;
+  }   
+    const currentUrl = process.env.CURRENT_URL;
+    const uniqueString = uuidv4() + user.id;
+    
+    bcrypt.hash(uniqueString,salt).then((hashedstring)=>{
+      verification.uniqueString=hashedstring;
+    verification.expiresAt =Date.now() + 50000;
+    verification.save();
+
+    newMailOptions = {
+      from: process.env.AUTH_EMAIL,
+      to: user.email,
+      subject: "Verify Your Email",
+      html: 
+          `<p>
+            Verify your email to complete the signup and login into your account.
+          </p>
+          <p>This link <b>expires in 15mins</b></p><p>click <a href=${currentUrl + "users/verify/" + user.id + "/" + uniqueString}>here</a> to proceed</p>`,  
+    };
+
+   return  Transport.sendMail(newMailOptions, function (error, response) {
+      if (error) {
+        console.log(error);
+        return { status: "Error", msg: "Email Not Sent" };
+      } else {
+        console.log("Email Sent Successfully");
+        return { status: "Pending", msg: " Verification Email Sent Successfully" };
+      }
+    });
+    }).catch(()=>{
+        res.json({
+            status:"Failed",
+            message:"An error occured while hashing"
+        })
+    })
+    
+};
+
 
 exports.updatepassword = function (data) {
   mailOptions = {
@@ -131,53 +185,20 @@ exports.calculateTithe = async function (income_id, user_id, res) {
   }
 };
 
-exports.createSubAccount = async function (data, user) {
-  try {
-    const payload = {
-      account_bank: data.bank.code,
-      account_number: data.accountNumber,
-      business_name: data.name,
-      business_email: user.email,
-      business_contact: data.address,
-      business_contact_mobile: user.phoneNumber,
-      business_mobile: data.phoneNumber,
-      country: data.country,
-      split_type: "flat",
-      split_value: 20,
-    };
-    const response = await flw.Subaccount.create(payload);
-    if (
-      response.status === "error" &&
-      response.message ===
-        "A subaccount with the account number and bank already exists"
-    ) {
-      const subs = await flw.Subaccount.fetch_all();
-      if (subs.status === "success") {
-        let account = subs.data.find((account) => {
-          return account.account_number == payload.account_number;
-        });
-        return account;
-      }
-    } else {
-      return response.data;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
 
-exports.verify_transaction = async function (transaction) {
-  try {
-    const payload = { id: transaction.flw_tran_id };
-    const response = await flw.Transaction.verify(payload);
-    if (response.status === "success") {
-      transaction.status = response.data.status;
-      transaction.save();
-      return transaction;
-    }
-  } catch (error) {
-    console.error(error);
-    return error;
-  }
-};
+
+exports.transferToChurch = async function(church,user,walett,amount,income){
+
+  const transferData = {
+    "account_bank": church.bank.code, 
+    "account_number": church.accountNumber,
+    "amount": amount,
+    "email" : user.email,
+    "narration": `Transfer from ${user.email} for ${church.name}`,
+    "currency": income.currency,
+    "debit_subaccount":walett.accountReference, //This is a merchant's unique reference for the transfer, it can be used to query 
+}
+const transferResponse = await api.post("/transfers", transferData);
+return transferResponse;
+}
 

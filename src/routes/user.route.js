@@ -7,7 +7,8 @@ const {
   getUserbyid,
   delete_user,
   verifyEmail,
-  verified
+  verified,
+  revalidate
 } = require("../controllers/user.controllers");
 const {
   signUpValidation,
@@ -19,6 +20,7 @@ const {
 const authenticateToken = require('../middlewares/authorization')
 
 router.post("/signUp", signUpValidation, signUp);
+router.post("/revalidate", revalidate);
 router.post("/signIn", signInValidation, signIn);
 router.get("/:id",authenticateToken, getUserbyid);
 router.get("/verify/:id/:string",verifyEmail);

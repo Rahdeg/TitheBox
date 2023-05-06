@@ -1,68 +1,43 @@
 const User = require("../models/user.model").User;
 const { Church } = require("../models/church.model");
-const { SubAccount } = require("../models/subAccount.model");
-const { createSubAccount } = require("../utils/functions");
+const AsyncManager = require("../utils/asyncManager");
+const LibraryError = require("../utils/libraryError");
 
-exports.addChurch = async function (req, res) {
-  try {
+
+exports.addChurch = AsyncManager(async function (req, res,next) {
+    try {
     const data = req.body;
-  const subacct_exists = await SubAccount.findOne({
-    accountNumber: data.accountNumber,
-  });
-  const user = await User.findById(req.params.id);
-  const details = {
-    address: data.address,
-    name: data.name,
-    serviceDays: data.serviceDays,
-  };
-  if (!user) {
-    return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-  }
-  if (!subacct_exists) {
-    const subAccountData = await createSubAccount(data, user);
-    if (subAccountData) {
-      const bankname = subAccountData.bank_name;
-      details.user_id = user.id;
-      const account = {
-        accountName: data.accountName,
-        accountNumber: data.accountNumber,
-        bankCode: data.bank.code,
-        subAccountId: subAccountData.subaccount_id,
-        bankName: bankname,
-      };
-      const subacct = new SubAccount(account);
-      details.subAccountIds = subacct.id;
-      const church = new Church(details);
-      subacct.save();
-      church.save();
-      return res.status(201).json(church);
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: `No user with id ${req.params.id}` });
     }
-  } else if (subacct_exists) {
+
     const details = {
+      user_id:user.id,
       address: data.address,
       name: data.name,
       serviceDays: data.serviceDays,
-      subAccountIds: subacct_exists.id,
-    };
-    details.user_id = user.id;
-    const account = {
       accountName: data.accountName,
       accountNumber: data.accountNumber,
-      bankCode: data.bankCode,
-      subAccountId: subacct_exists.id,
-      bankName: subacct_exists.bankName,
+      country:data.country,
+      bank:{
+        code:data.bank.code,
+        name:data.bank.name
+      }
     };
-    console.log("here 3")
-    const church = new Church(details);
-    church.save();
+
+    const church = await Church.create(details);
     return res.status(201).json(church);
-  }
-  } catch (error) {
-    console.log(error)
-    return res.status(500).json({message:"an error occurred"})
-  }
+    
+    } catch (error) {
+      
+      // return res.status(500).json({message:"an error occurred"})
+      return next(new LibraryError(error.message, 404));
+    }
   
-};
+  }
+);
 
 exports.getChurches = async function (req, res) {
   try {
