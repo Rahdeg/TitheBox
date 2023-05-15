@@ -6,15 +6,15 @@ const {
   getChurch,
   updateChurch,
   deleteChurch,
-  getChurchAccounts,
-  getChurchAccount,
 } = require("../controllers/church.controllers");
 
 const authenticateToken = require('../middlewares/authorization')
 
-router.post("/:id/churches",authenticateToken, addChurch).get(authenticateToken, getChurches);
-router.get("/:id/churches/:church_id",authenticateToken, getChurch).put(authenticateToken, updateChurch).delete(authenticateToken, deleteChurch);
-// router.get("/:id/churches/:church_id/accounts",authenticateToken, getChurchAccounts);
-// router.get("/:id/churches/:church_id/accounts/:acc_id",authenticateToken, getChurchAccount);
+router.post("/:id/churches",authenticateToken, addChurch);
+router.get("/:id/churches",authenticateToken, getChurches);
+router.get("/:id/churches/:church_id",authenticateToken, getChurch)
+router.put("/:id/churches/:church_id",authenticateToken, updateChurch)
+router.delete("/:id/churches/:church_id",authenticateToken, deleteChurch);
+
 
 module.exports = router;

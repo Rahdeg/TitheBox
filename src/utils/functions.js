@@ -54,7 +54,7 @@ exports.senddetails =async function (user) {
         const Verified= new Userverification({
             user_id:user.id,
             uniqueString:hashedstring,
-            expiresAt: Date.now() + 10000,
+            expiresAt: Date.now() + 900000,
         });
         Verified.save()
         .then(()=>{
@@ -97,7 +97,7 @@ exports.senddetails =async function (user) {
     
     bcrypt.hash(uniqueString,salt).then((hashedstring)=>{
       verification.uniqueString=hashedstring;
-    verification.expiresAt =Date.now() + 50000;
+    verification.expiresAt =Date.now() + 900000;
     verification.save();
 
     newMailOptions = {
