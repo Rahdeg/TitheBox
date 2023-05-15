@@ -11,9 +11,8 @@ const userSchema = new mongoose.Schema({
     password:{type:String, required:true, select:false},
     token:{type:String},
     code:{type:String},
-    verified:{type:Boolean}
-
-
+    verified:{type:Boolean},
+    walettId: { type: mongoose.Schema.Types.ObjectId, ref: 'Waletts' },
 },{
     timestamps:true
 })

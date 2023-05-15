@@ -47,7 +47,11 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
           }
         
           const walettDetails = await Walett.create(walettData);
+          const walettId = walettDetails._id;
 
+          user.walettId = walettId;
+              await user.save();
+              
           return res.status(200).json(walettDetails);
           
     } catch (error) {
