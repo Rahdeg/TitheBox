@@ -21,7 +21,10 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
         const user = await User.findById(req.params.id);
     if (!user) {
             return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-          }
+          };
+    if(user.walettId){
+      return res.status(404).json({ msg: `User already has a walett id ${user.walettId}` });
+    };
           const data ={
             account_name:user.firstName,
             email:user.email,
