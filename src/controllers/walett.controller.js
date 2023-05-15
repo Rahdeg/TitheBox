@@ -173,7 +173,6 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
   try {
       const user = await User.findById(req.params.id);
       const church = await Church.findById(req.params.church_id);
-      const income = await Income.findById(req.params.income_id);
       const walett = await Walett.findById(req.params.walett_id);
 
   if (!user) {
@@ -184,9 +183,6 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
           return res.status(404).json({ msg: `No church with id ${req.params.church_id}` });
         }
 
-        if (!income) {
-          return res.status(404).json({ msg: `No income with id ${req.params.income_id}` });
-        }
 
   if (!walett) {
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
@@ -200,7 +196,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
     "amount": data.amount,
     "email" : user.email,
     "narration": data.narration,
-    "currency": income.currency,
+    "currency": 'NGN',
     "debit_subaccount":walett.accountReference, 
     }
     
