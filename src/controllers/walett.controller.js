@@ -19,12 +19,23 @@ const api = axios.create({
 exports.createWallet=AsyncManager(async(req,res,next)=>{
     try {
         const user = await User.findById(req.params.id);
+        const waletts = await Walett.find();
+        const foundWallet = waletts.find(wallet => wallet?.email === user?.email);
     if (!user) {
             return res.status(404).json({ msg: `No user with id ${req.params.id}` });
           };
     if(user.walettId){
-      return res.status(404).json({ msg: `User already has a walett id ${user.walettId}` });
+      const walett = await Walett.findById(user.walettId)
+      return res.status(404).json(walett);
     };
+
+    if (foundWallet) {
+        user.walettId = foundWallet._id;
+              await user.save();
+      return res.status(404).json(foundWallet);
+    }
+
+
           const data ={
             account_name:user.firstName,
             email:user.email,
