@@ -6,6 +6,7 @@ const LibraryError = require("../utils/libraryError");
 const {Walett  } = require("../models/walett.model");
 const { Church } = require("../models/church.model");
 const { Income } = require("../models/income.model");
+
 const { calculateTithe, getChargeFee, transferToChurch } = require("../utils/functions");
 
 require("dotenv").config();
@@ -30,8 +31,6 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
     };
 
     if (foundWallet) {
-        user.walettId = foundWallet._id;
-              await user.save();
       return res.status(404).json(foundWallet);
     }
 
@@ -150,6 +149,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
       const church = await Church.findById(req.params.church_id);
       const income = await Income.findById(req.params.income_id);
       const walett = await Walett.findById(req.params.walett_id);
+      
 
   if (!user) {
           return res.status(404).json({ msg: `No user with id ${req.params.id}` });
@@ -166,10 +166,16 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
   if (!walett) {
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
         }
-
+    
+     const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
+    const walettBalance= response.data?.data?.available_balance
+ 
     const amount = await calculateTithe(req.params.income_id, req.params.id, res);
     // const charge = await getChargeFee(amount, currency);
     // const total_amount = amount + charge;
+    if (walettBalance <= amount ) {
+      return res.status(404).json({ msg: 'Insufficient funds' });
+    }
         
       const transfer = await  transferToChurch(church,user,walett,amount,income);
       return res.status(200).json(transfer.data);
@@ -198,9 +204,17 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
   if (!walett) {
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
         }
+    
+        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
+       
+        const walettBalance= response.data?.data?.available_balance
 
-    const data = req.body;
-  
+        const data = req.body;
+
+        if (walettBalance <= data.amount ) {
+          return res.status(404).json({ msg: 'Insufficient funds' });
+        }
+            
     const transferData={
     "account_bank": church.bank.code, 
     "account_number": church.accountNumber,
