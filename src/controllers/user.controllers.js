@@ -155,6 +155,9 @@ exports.revalidate= async (req,res)=>{
   try {
     const {email} = req.body;
   const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ msg: ` user with email ${email} does not exist` });
+  }
  
 if (user.verified) {
   return res.status(404).json({ msg: ` user with email ${email} as been verified` });
