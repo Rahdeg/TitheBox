@@ -31,7 +31,10 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
     };
 
     if (foundWallet) {
+      user.walettId = walettId;
+              await user.save();
       return res.status(404).json(foundWallet);
+      
     }
 
 
