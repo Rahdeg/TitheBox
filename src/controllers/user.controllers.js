@@ -64,8 +64,9 @@ exports.signIn = async function (req, res) {
             { id: user._id, email: user.email },
             ACCESS_SECRET
           );
-          delete user.password;
-          return res.status(200).json(user);
+          const userWithoutPassword = { ...user._doc };
+          delete userWithoutPassword.password;
+          return res.status(200).json(userWithoutPassword);
         }
       });
     }
