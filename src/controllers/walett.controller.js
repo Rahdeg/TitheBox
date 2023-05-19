@@ -214,9 +214,15 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
 
         const data = req.body;
 
+        if (data.amount < 100 ) {
+          return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });
+        }
+
         if (walettBalance <= data.amount ) {
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
+
+       
             
     const transferData={
     "account_bank": church.bank.code, 
