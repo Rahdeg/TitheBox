@@ -194,7 +194,7 @@ exports.transferToChurch = async function(church,user,walett,amount,income){
     "account_number": church.accountNumber,
     "amount": amount,
     "email" : user.email,
-    "narration": `Transfer from ${user.email} for ${church.name}`,
+    "narration": `${user.firstName} ${user.lastName}, Tithe from Tithebox App`,
     "currency": income.currency,
     "debit_subaccount":walett.accountReference, //This is a merchant's unique reference for the transfer, it can be used to query 
 }

@@ -229,7 +229,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
     "account_number": church.accountNumber,
     "amount": data.amount,
     "email" : user.email,
-    "narration": data.narration,
+    "narration":  `${user.firstName} ${user.lastName}, ${data.narration} from Tithebox App`,
     "currency": 'NGN',
     "debit_subaccount":walett.accountReference, 
     }

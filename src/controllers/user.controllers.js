@@ -103,7 +103,7 @@ exports.verifyEmail= async (req,res)=>{
         // })
         console.log("Verification Expired Please revalidate using your email" )
         let message= "Verification Expired Please revalidate using your email";
-        res.redirect(`/users/verified/error=true&message=${message}`) 
+        res.redirect(`/api/v1/users/verified?error=true&message=${message}`) 
         
       }else{
         //valid record exist so we validate user
@@ -121,35 +121,35 @@ exports.verifyEmail= async (req,res)=>{
              .catch((error)=>{
               console.log(error)
               let message= `An error occured while finalizing successful verification`;
-              res.redirect(`/users/verified/error=true&message=${message}`);
+              res.redirect(`/api/v1/users/verified?error=true&message=${message}`);
              })
             })
             .catch((error)=>{
               console.log(error)
               let message= `An error occured while updating user record to show verified`;
-              res.redirect(`/users/verified/error=true&message=${message}`);
+              res.redirect(`/api/v1/users/verified?error=true&message=${message}`);
             })
 
           } else {
             //existing record incorrect verification details passed
             let message= `Invalid verification details passed.Check your inbox.`;
-          res.redirect(`/users/verified/error=true&message=${message}`);
+          res.redirect(`/api/v1/users/verified?error=true&message=${message}`);
           }
         })
         .catch(()=>{
           let message= `An error occured while comparing unique strings`;
-          res.redirect(`/users/verified/error=true&message=${message}`);
+          res.redirect(`/api/v1/users/verified?error=true&message=${message}`);
         })
       }
     } else {
     let message= `Account record does'nt exist or has been verified already.Please sign up or log in`;
-    res.redirect(`/users/verified/error=true&message=${message}`)
+    res.redirect(`/api/v1/users/verified?error=true&message=${message}`)
     }
   })
   .catch((error)=>{
     console.log(error)
     let message= "An error occurred while checking for existing user verification records";
-    res.redirect(`/users/verified/error=true&message=${message}`);
+    res.redirect(`/api/v1/users/verified?error=true&message=${message}`);
   })
 }
 
