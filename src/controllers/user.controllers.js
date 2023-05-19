@@ -172,15 +172,6 @@ if (user.verified) {
 
 
 exports.verified= async (req,res)=>{
-  console.info("touches the verified endpoint")
-  const error = req.query.error
-  const message = req.query.message
-  if(error){
-    if(message){
-      //you can add an ejs template here and pass the message into it
-      return res.status(400).send(message);
-    }
-  }
   res.sendFile(path.join(__dirname,"../views/verified.html"))
 }
 
