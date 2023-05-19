@@ -22,11 +22,11 @@ const authenticateToken = require('../middlewares/authorization')
 router.post("/signUp", signUpValidation, signUp);
 router.post("/revalidate", revalidate);
 router.post("/signIn", signInValidation, signIn);
-router.get("/:id",authenticateToken, getUserbyid);
-router.get("/verify/:id/:string",verifyEmail);
 router.get("/verified",verified);
-router.delete("/:id", authenticateToken,delete_user);
+router.get("/verify/:id/:string",verifyEmail);
 router.put("/update/:id", updateValidation,authenticateToken, update);
 router.put("/updatepassword/:id", updatepasswordvalidation,authenticateToken, updatepassword);
+router.get("/:id",authenticateToken, getUserbyid);
+router.delete("/:id", authenticateToken,delete_user);
 
 module.exports = router;
