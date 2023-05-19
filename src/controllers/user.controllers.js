@@ -64,9 +64,7 @@ exports.signIn = async function (req, res) {
             { id: user._id, email: user.email },
             ACCESS_SECRET
           );
-          const userWithoutPassword = { ...user._doc };
-          delete userWithoutPassword.password;
-          return res.status(200).json(userWithoutPassword);
+          return res.status(200).json(user);
         }
       });
     }
@@ -142,7 +140,7 @@ exports.verifyEmail= async (req,res)=>{
         })
       }
     } else {
-    let message= `Account record does'nt exist or has been verified already.Please sign up or log in`;
+    let message= `Account record doesn't exist or has been verified already.Please sign up or log in`;
     res.redirect(`/api/v1/users/verified?error=true&message=${message}`)
     }
   })
@@ -157,9 +155,6 @@ exports.revalidate= async (req,res)=>{
   try {
     const {email} = req.body;
   const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(404).json({ msg: ` user with email ${email} does not exist` });
-  }
  
 if (user.verified) {
   return res.status(404).json({ msg: ` user with email ${email} as been verified` });
