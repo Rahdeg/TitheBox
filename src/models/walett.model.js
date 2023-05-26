@@ -5,16 +5,13 @@ const walettSchema = new mongoose.Schema({
         ref:'Users',
         required:true
     },
-    id:{type:String, required:[true, "Please add an id"]},
-    accountReference:{type:String, required:[true, "Please add a reference"]},
-    accountName:{type:String, required:[true, "Please add a account name"]},
-    barterId:{type:String, required:[true, "Please add a barterId"]},
+    orderRef:{type:String, required:[true, "Please add a reference"]},
+    flwRef:{type:String, required:[true, "Please add a reference"]},
     email:{type:String, required:[true, "Please add an barterId"]},
     mobileNumber:{type:String, required:[true, "Please add a mobileNumber"]},
-    nuban:{type:String, required:[true, "Please add a nuban"]},
+    accountNumber:{type:String, required:[true, "Please add an account number"]},
     bankName:{type:String, required:[true, "Please add a bankName"]},
-    bankCode:{type:String, required:[true, "Please add a bankCode"]},
-    status:{type:String, required:[true, "Please add a status"]},
+    balance:{type: Number, default:0},
     
 },{
     timestamps:true

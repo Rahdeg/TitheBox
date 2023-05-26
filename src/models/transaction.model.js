@@ -6,19 +6,12 @@ const transactionSchema = new mongoose.Schema({
         required:true
     },
     flw_tran_id:{type:String,default:null},
-    income_id:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Incomes',
-        required:true
-    },
-    amount:{type:Number, required:true},
-    church:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Church', 
-        required:true
-    },
-    tithePercentage:{type:Number, required:true},
-    currency:{type:String,required:true},
+
+    amount:{type:Number, required:true, default: 0},
+
+    type:{type: String, required:true },
+
+    balance:{type:Number, required:true},
     status:{type:String, default:"pending"}
 },{
     timestamps:true

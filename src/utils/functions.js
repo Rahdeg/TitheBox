@@ -187,18 +187,34 @@ exports.calculateTithe = async function (income_id, user_id, res) {
 
 
 
-exports.transferToChurch = async function(church,user,walett,amount,income){
+exports.transferToChurch = async function(church,user,amount,income){
 
   const transferData = {
-    "account_bank": church.bank.code, 
+    "account_bank": church.bank.code,
     "account_number": church.accountNumber,
     "amount": amount,
     "email" : user.email,
     "narration": `${user.firstName} ${user.lastName}, Tithe from Tithebox App`,
     "currency": income.currency,
-    "debit_subaccount":walett.accountReference, //This is a merchant's unique reference for the transfer, it can be used to query 
+    "reference":Date.now(),
+
 }
 const transferResponse = await api.post("/transfers", transferData);
 return transferResponse;
 }
 
+
+exports.createVitualAcct = async function(user){
+  let data = {
+    "email": user.email,
+      "is_permanent": true,
+      "tx_ref": user._id,
+      "nin": "13776724776",
+      "phonenumber": "0810643830",
+      "firstname": user.firstName,
+      "lastname": user.lastName,
+      "narration": "Angela"
+  };
+  const walettResponse = await api.post("/virtual-account-numbers", data);
+  return walettResponse.data.data;
+}

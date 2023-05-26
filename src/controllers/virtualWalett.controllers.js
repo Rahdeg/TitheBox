@@ -6,8 +6,10 @@ const LibraryError = require("../utils/libraryError");
 const {Walett  } = require("../models/walett.model");
 const { Church } = require("../models/church.model");
 const { Income } = require("../models/income.model");
+const {Transaction} = require("../models/transaction.model")
 
-const { calculateTithe, getChargeFee, transferToChurch, transferToWalett } = require("../utils/functions");
+
+const { calculateTithe, getChargeFee, transferToChurch, transferToWalett, createVitualAcct } = require("../utils/functions");
 
 require("dotenv").config();
 const flw = new Flutterwave(process.env.FLUTTER_PUB, process.env.FLUTTER_SEC);
@@ -17,59 +19,32 @@ const api = axios.create({
   headers: { Authorization: `Bearer ${process.env.FLUTTER_SEC}` },
 });
 
-exports.createWallet=AsyncManager(async(req,res,next)=>{
+exports.createAwallet=AsyncManager(async(req,res,next)=>{
     try {
         const user = await User.findById(req.params.id);
-        const waletts = await Walett.find();
-        const foundWallet = waletts.find(wallet => wallet?.email === user?.email);
-    if (!user) {
+        const walett = await Walett.find({user_id: req.params.id});
+     if (!user) {
             return res.status(404).json({ msg: `No user with id ${req.params.id}` });
           };
-    if(user.walettId){
-      const walett = await Walett.findById(user.walettId)
-      return res.status(404).json(walett);
-    };
+    if (walett) {
+        user.walettId = walett._id;
+            await user.save();
+            return res.status(404).json(walett);
+        }
 
-    if (foundWallet) {
-      user.walettId = foundWallet._id;
-              await user.save();
-      return res.status(404).json(foundWallet);
-      
-    }
+      const createWalett= await createVitualAcct(user);
 
-
-          const data ={
-            account_name:user.firstName,
-            email:user.email,
-            mobilenumber:user.phoneNumber,
-            country:"NG",
-          }
-          
-          const response = await api.post("/payout-subaccounts", data);
-          const walett = response.data.data;
-
-          const walettData ={
-            user_id:user.id,
-            id:walett.id,
-            accountReference:walett.account_reference,
-            accountName:walett.account_name,
-            barterId:walett.barter_id,
-            email:walett.email,
-            mobileNumber:walett.mobilenumber,
-            nuban:walett.nuban,
-            bankName:walett.bank_name,
-            bankCode:walett.bank_code,
-            status:walett.status,
-          }
-        
-          const walettDetails = await Walett.create(walettData);
-          const walettId = walettDetails._id;
-
-          user.walettId = walettId;
-              await user.save();
-              
-          return res.status(200).json(walettDetails);
-          
+      const walettData ={
+        user_id:user.id,
+        orderRef:createWalett.order_ref,
+        email:user.email,
+        accountNumber:createWalett.account_number,
+        bankName:createWalett.bank_name,
+        mobileNumber:user.phoneNumber,
+        flwRef:createWalett.flw_ref,
+      }
+      const walettDetails = await Walett.create(walettData);
+        return res.status(200).json(walettDetails);
     } catch (error) {
         console.log(error)
         return next(new LibraryError(error.message, 404));
@@ -77,26 +52,19 @@ exports.createWallet=AsyncManager(async(req,res,next)=>{
 })
 
 
-exports.getWalett=AsyncManager(async(req,res,next)=>{
+exports.getAWalett=AsyncManager(async(req,res,next)=>{
   try {
-      const user = await User.findById(req.params.id);
-      const walett = await Walett.findById(req.params.walett_id);
+    const user = await User.findById(req.params.id);
+    const walett = await Walett.find({user_id: req.params.id});
+    if (!user) {
+      return res.status(404).json({ msg: `No user with id ${req.params.id}` });
+    };
 
-  if (!user) {
-          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-        }
 
-  if (!walett) {
-          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
-        }
-        
-        const walettDetails = await Walett.find({user_id: req.params.id});
-
-        return res.status(200).json(walettDetails);
-        
+    return res.status(200).json(walett);
   } catch (error) {
-      console.log(error)
-      return next(new LibraryError(error.message, 404));
+    console.log(error)
+        return next(new LibraryError(error.message, 404));
   }
 })
 
@@ -104,6 +72,7 @@ exports.getWalettTransactions=AsyncManager(async(req,res,next)=>{
   try {
       const user = await User.findById(req.params.id);
       const walett = await Walett.findById(req.params.walett_id);
+      const transactions = await Transaction.find({user_id: req.params.id});
 
   if (!user) {
           return res.status(404).json({ msg: `No user with id ${req.params.id}` });
@@ -112,10 +81,13 @@ exports.getWalettTransactions=AsyncManager(async(req,res,next)=>{
   if (!walett) {
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
         }
-        
-        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/transactions`);
 
-        return res.status(200).json(response.data);
+  if (!transactions) {
+          return res.status(404).json({ msg: `No transaction found for this user` });
+        }
+        
+        
+        return res.status(200).json(transactions);
         
   } catch (error) {
       console.log(error)
@@ -123,28 +95,6 @@ exports.getWalettTransactions=AsyncManager(async(req,res,next)=>{
   }
 })
 
-exports.getWalettBalance=AsyncManager(async(req,res,next)=>{
-  try {
-      const user = await User.findById(req.params.id);
-      const walett = await Walett.findById(req.params.walett_id);
-
-  if (!user) {
-          return res.status(404).json({ msg: `No user with id ${req.params.id}` });
-        }
-
-  if (!walett) {
-          return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
-        }
-        
-        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
-
-        return res.status(200).json(response.data);
-        
-  } catch (error) {
-      console.log(error)
-      return next(new LibraryError(error.message, 404));
-  }
-})
 
 exports.payTithe=AsyncManager(async(req,res,next)=>{
   try {
@@ -170,18 +120,39 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
         }
     
-     const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
-    const walettBalance= response.data?.data?.available_balance
- 
+    
+    const currency = income.currency;
     const amount = await calculateTithe(req.params.income_id, req.params.id, res);
-    // const charge = await getChargeFee(amount, currency);
-    // const total_amount = amount + charge;
-    if (walettBalance <= amount ) {
+    const charge = await getChargeFee(amount, currency);
+    const total_amount = (amount + charge + 15).toFixed(2) ;
+    const walettBalance = walett.balance;
+
+    if (walettBalance <= total_amount ) {
       return res.status(404).json({ msg: 'Insufficient funds' });
     }
         
-      const transfer = await  transferToWalett(amount);
-      return res.status(200).json(transfer.data);
+      const transfer = await  transferToChurch(church,user,amount,income);
+      // return res.status(200).json(transfer.data);
+      if (transfer.data.status === 'success') {
+        walett.balance -= total_amount
+        await walett.save()
+
+        const detail = {
+          user_id:user._id,
+          flw_tran_id:transfer.data.data.reference,
+          amount:(transfer.data.data.amount + transfer.data.data.fee).toFixed(2),
+          type:"Debit",
+          balance:(walett.balance).toFixed(2),
+          status: transfer.data.data.status
+      }
+
+      await Transaction.create(detail);
+
+        return res.status(200).json({ msg: 'Transaction Successfull' });
+      } else{
+        return res.status(404).json({ msg: 'Something went wrong' });
+      }
+
         
   } catch (error) {
       console.log(error)
@@ -208,9 +179,6 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
           return res.status(404).json({ msg: `No walett with id ${req.params.walett_id}` });
         }
     
-        const response = await api.get(`/payout-subaccounts/${walett.accountReference}/balances`);
-       
-        const walettBalance= response.data?.data?.available_balance
 
         const data = req.body;
 
@@ -218,24 +186,42 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
           return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });
         }
 
-        if (walettBalance <= data.amount ) {
+        if (walett.balance <= data.amount ) {
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
-
-       
+   const total_amount = Number(data.amount) + 15;
             
     const transferData={
     "account_bank": church.bank.code, 
     "account_number": church.accountNumber,
-    "amount": data.amount,
+    "amount": Number(data.amount).toFixed(2),
     "email" : user.email,
     "narration":  `${user.firstName} ${user.lastName}, ${data.narration} from Tithebox App`,
     "currency": 'NGN',
-    "debit_subaccount":walett.accountReference, 
     }
     
     const transferResponse = await api.post("/transfers", transferData);
-      return res.status(200).json(transferResponse.data);
+
+    if (transferResponse.data.status === 'success') {
+      walett.balance -= total_amount
+      await walett.save()
+
+      const detail = {
+        user_id:user._id,
+        flw_tran_id:transferResponse.data.data.reference,
+        amount:(transferResponse.data.data.amount + transferResponse.data.data.fee).toFixed(2),
+        type:"Debit",
+        balance:(walett.balance).toFixed(2),
+        status: transferResponse.data.data.status
+    }
+
+    await Transaction.create(detail);
+
+      return res.status(200).json({ msg: 'Transaction Successfull' });
+    } else{
+      return res.status(404).json({ msg: 'Something went wrong' });
+    }
+
         
   } catch (error) {
       console.log(error)
