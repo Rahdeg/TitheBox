@@ -204,13 +204,13 @@ return transferResponse;
 }
 
 
-exports.createVitualAcct = async function(user){
+exports.createVitualAcct = async function(user,NIN){
   let data = {
     "email": user.email,
       "is_permanent": true,
       "tx_ref": user._id,
-      "nin": "13776724776",
-      "phonenumber": "0810643830",
+      "nin": NIN,
+      "phonenumber": user.phoneNumber,
       "firstname": user.firstName,
       "lastname": user.lastName,
       "narration": "Angela"
