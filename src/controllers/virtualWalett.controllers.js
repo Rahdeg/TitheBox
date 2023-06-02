@@ -23,7 +23,7 @@ exports.createAwallet=AsyncManager(async(req,res,next)=>{
     try {
         const user = await User.findById(req.params.id);
         const walett = await Walett.find({user_id: req.params.id});
-        const NIN = req.body;
+        const data = req.body;
      if (!user) {
             return res.status(404).json({ msg: `No user with id ${req.params.id}` });
           };
@@ -33,7 +33,7 @@ exports.createAwallet=AsyncManager(async(req,res,next)=>{
             return res.status(404).json(walett);
         }
 
-      const createWalett= await createVitualAcct(user,NIN);
+      const createWalett= await createVitualAcct(user,data.NIN);
 
       const walettData ={
         user_id:user.id,
