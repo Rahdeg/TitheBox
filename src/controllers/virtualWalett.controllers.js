@@ -45,6 +45,8 @@ console.log("i am here 2")
         flwRef:createWalett.flw_ref,
       }
       const walettDetails = await Walett.create(walettData);
+      user.walettId =walettDetails._id;
+      await user.save();
         return res.status(200).json(walettDetails);
     } catch (error) {
         console.log(error)
