@@ -198,6 +198,10 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
    const total_amount = Number(data.amount) + 15;
+
+   if (walett.balance <= total_amount ) {
+    return res.status(404).json({ msg: 'Insufficient funds' });
+  }
             
     const transferData={
     "account_bank": church.bank.code, 
