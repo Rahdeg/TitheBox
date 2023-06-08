@@ -131,6 +131,10 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
     const total_amount = (amount + charge + 15).toFixed(2) ;
     const walettBalance = walett.balance;
 
+    if (total_amount < 100 ) {
+      return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });
+    }
+
     if (walettBalance <= total_amount ) {
       return res.status(404).json({ msg: 'Insufficient funds' });
     }
@@ -138,7 +142,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
       const transfer = await  transferToChurch(church,user,amount,income);
       // return res.status(200).json(transfer.data);
       if (transfer.data.status === 'success') {
-        walett.balance -= total_amount.toFixed(2)
+        walett.balance = (walett.balance - total_amount).toFixed(2)
         await walett.save()
 
         const detail = {
@@ -207,7 +211,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
     const transferResponse = await api.post("/transfers", transferData);
 
     if (transferResponse.data.status === 'success') {
-      walett.balance -= total_amount.toFixed(2)
+      walett.balance = (walett.balance - total_amount).toFixed(2)
       await walett.save()
 
       const detail = {
