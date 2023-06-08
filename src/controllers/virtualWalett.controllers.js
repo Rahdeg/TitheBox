@@ -137,7 +137,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
       const transfer = await  transferToChurch(church,user,amount,income);
       // return res.status(200).json(transfer.data);
       if (transfer.data.status === 'success') {
-        walett.balance -= total_amount
+        walett.balance -= total_amount.toFixed(2)
         await walett.save()
 
         const detail = {
@@ -206,7 +206,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
     const transferResponse = await api.post("/transfers", transferData);
 
     if (transferResponse.data.status === 'success') {
-      walett.balance -= total_amount
+      walett.balance -= total_amount.toFixed(2)
       await walett.save()
 
       const detail = {

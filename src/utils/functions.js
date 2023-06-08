@@ -209,7 +209,7 @@ exports.createVitualAcct = async function(user){
     "email": user.email,
       "is_permanent": true,
       "tx_ref": user._id,
-      "nin": "13776724776",
+      "bvn": "22268436153",
       "phonenumber": user.phoneNumber,
       "firstname": user.firstName,
       "lastname": user.lastName,

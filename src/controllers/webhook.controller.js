@@ -10,7 +10,7 @@ exports.webhook = async function(req,res){
             console.log(payload);
             const amount = payload.data.amount - payload.data.app_fee
             const walettBalance = walett.balance + amount
-            walett.balance = walettBalance
+            walett.balance = walettBalance.toFixed(2)
             await walett.save();
 
             const detail = {
