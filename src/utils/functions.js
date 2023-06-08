@@ -213,7 +213,7 @@ exports.createVitualAcct = async function(user){
       "phonenumber": user.phoneNumber,
       "firstname": user.firstName,
       "lastname": user.lastName,
-      "narration": "TitheBox App"
+      "narration": `${user.firstName} ${user.lastName}`
   };
   const walettResponse = await api.post("/virtual-account-numbers", data);
   return walettResponse.data.data;
