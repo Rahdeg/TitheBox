@@ -41,6 +41,7 @@ console.log("i am here 2")
         email:user.email,
         accountNumber:createWalett.account_number,
         bankName:createWalett.bank_name,
+        accountName:`${user.firstName} ${user.lastName}`,
         mobileNumber:user.phoneNumber,
         flwRef:createWalett.flw_ref,
       }

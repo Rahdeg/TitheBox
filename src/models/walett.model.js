@@ -10,6 +10,7 @@ const walettSchema = new mongoose.Schema({
     email:{type:String, required:[true, "Please add an barterId"]},
     mobileNumber:{type:String, required:[true, "Please add a mobileNumber"]},
     accountNumber:{type:String, required:[true, "Please add an account number"]},
+    accountName:{type:String, required:[true, "Please add an account name"]},
     bankName:{type:String, required:[true, "Please add a bankName"]},
     balance:{type: Number, default:0},
     
