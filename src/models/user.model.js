@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     token:{type:String},
     code:{type:String},
     verified:{type:Boolean},
-    totalTithe:{type: number,default: 0.00 },
+    totalTithe:{type: Number,default: 0.00 },
     walettId: { type: mongoose.Schema.Types.ObjectId, ref: 'Waletts' },
 },{
     timestamps:true
