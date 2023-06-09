@@ -7,7 +7,7 @@ exports.webhook = async function(req,res){
         const walett = await Walett.findOne({user_id:payload.data.tx_ref});
                
         if (payload.data.status === 'successful') {
-            console.log(payload);
+            
             const amount = payload.data.amount - payload.data.app_fee
             const walettBalance = walett.balance + amount
             walett.balance = (walettBalance).toFixed(2)
@@ -26,7 +26,7 @@ exports.webhook = async function(req,res){
 
             return res.status(200).json({msg:"wallet updated Succesfully"});
         } else {
-            console.log(payload)
+           
             return res.status(200).send("webhook received")
         }
     } else {
