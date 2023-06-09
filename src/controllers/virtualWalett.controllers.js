@@ -23,7 +23,6 @@ exports.createAwallet=AsyncManager(async(req,res,next)=>{
     try {
         const user = await User.findById(req.params.id);
         const walett = await Walett.find({user_id: req.params.id});
-        console.log('wa',walett)
      if (!user) {
             return res.status(404).json({ msg: `No user with id ${req.params.id}` });
           };
@@ -32,7 +31,6 @@ exports.createAwallet=AsyncManager(async(req,res,next)=>{
             await user.save();
             return res.status(200).json(walett);
         }
-console.log("i am here 2")
       const createWalett= await createVitualAcct(user);
 
       const walettData ={
@@ -144,7 +142,10 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
       if (transfer.data.status === 'success') {
         walett.balance = (walett.balance - total_amount).toFixed(2)
         await walett.save()
-
+        if (user.totalTithe) {
+          user.totalTithe = (user.totalTithe + amount).toFixed(2)
+          await user.save()
+        }
         const detail = {
           user_id:user._id,
           flw_tran_id:transfer.data.data.reference,
