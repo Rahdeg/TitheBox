@@ -128,6 +128,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
     const charge = await getChargeFee(amount, currency);
     const total_amount = (amount + charge + 15).toFixed(2) ;
     const walettBalance = walett.balance;
+    
 
     if (total_amount < 100 ) {
       return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });

@@ -16,7 +16,7 @@ exports.webhook = async function(req,res){
             const detail = {
                 user_id:payload.data.tx_ref,
                 flw_tran_id:payload.data.flw_ref,
-                amount:(payload.data.amount + payload.data.app_fee).toFixed(2),
+                amount:(payload.data.amount).toFixed(2),
                 type:"Credit",
                 balance:(walett.balance).toFixed(2),
                 status: payload.data.status
