@@ -150,7 +150,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
         const detail = {
           user_id:user._id,
           flw_tran_id:transfer.data.data.reference,
-          amount:(transfer.data.data.amount + transfer.data.data.fee).toFixed(2),
+          amount:(total_amount).toFixed(2),
           type:"Debit",
           balance:(walett.balance).toFixed(2),
           status: transfer.data.data.status
@@ -223,7 +223,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
       const detail = {
         user_id:user._id,
         flw_tran_id:transferResponse.data.data.reference,
-        amount:(transferResponse.data.data.amount + transferResponse.data.data.fee).toFixed(2),
+        amount:(total_amount).toFixed(2),
         type:"Debit",
         balance:(walett.balance).toFixed(2),
         status: transferResponse.data.data.status
