@@ -33,6 +33,7 @@ exports.signUp = async function (req, res) {
           return res.status(400).json({ msg: "User Not Saved" });
         } else if (user) {
           senddetails(user);
+          user.password = null;
           return res.status(201).json(user);
         }
       });
@@ -64,6 +65,7 @@ exports.signIn = async function (req, res) {
             { id: user._id, email: user.email },
             ACCESS_SECRET
           );
+          user.password = null;
           return res.status(200).json(user);
         }
       });
