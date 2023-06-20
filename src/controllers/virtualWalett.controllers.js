@@ -74,7 +74,7 @@ exports.getWalettTransactions=AsyncManager(async(req,res,next)=>{
   try {
       const user = await User.findById(req.params.id);
       const walett = await Walett.findById(req.params.walett_id);
-      const transactions = await Transaction.find({user_id: req.params.id});
+      const transactions = await Transaction.find({user_id: req.params.id}).sort({ createdAt: -1 });;
 
   if (!user) {
           return res.status(404).json({ msg: `No user with id ${req.params.id}` });
