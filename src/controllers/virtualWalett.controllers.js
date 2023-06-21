@@ -225,7 +225,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
         flw_tran_id:transferResponse.data.data.reference,
         amount:total_amount,
         type:"Debit",
-        balance:(walett.balance).toFixed(2),
+        balance:walett.balance,
         status: transferResponse.data.data.status
     }
 
