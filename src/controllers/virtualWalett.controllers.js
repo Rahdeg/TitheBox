@@ -150,7 +150,7 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
         const detail = {
           user_id:user._id,
           flw_tran_id:transfer.data.data.reference,
-          amount:(total_amount).toFixed(2),
+          amount:total_amount,
           type:"Debit",
           balance:(walett.balance).toFixed(2),
           status: transfer.data.data.status
@@ -199,7 +199,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
         if (walett.balance <= data.amount ) {
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
-   const total_amount = Number(data.amount) + 15;
+   const total_amount = (Number(data.amount) + 15).toFixed(2);
 
    if (walett.balance <= total_amount ) {
     return res.status(404).json({ msg: 'Insufficient funds' });
@@ -223,7 +223,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
       const detail = {
         user_id:user._id,
         flw_tran_id:transferResponse.data.data.reference,
-        amount:(total_amount).toFixed(2),
+        amount:total_amount,
         type:"Debit",
         balance:(walett.balance).toFixed(2),
         status: transferResponse.data.data.status
