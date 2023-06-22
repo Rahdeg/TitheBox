@@ -194,7 +194,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
 
          const charge = await getChargeFee(data.amount, "NGN");
 
-         console.log("charge",charge);
+         
 
         if (data.amount < 100 ) {
           return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });
