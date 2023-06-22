@@ -157,12 +157,12 @@ exports.generateCode = function (codeLength) {
   return randomCode;
 };
 
-exports.getChargeFee = async function (amount, currency) {
+
+
+exports.getChargeFee = async function (amount) {
   try {
-    let detail = { amount, currency };
-    const flutter_fee = await flw.Transaction.fee(detail);
-    const gain = flutter_fee.data.flutterwave_fee;
-    return Number(gain);
+    const flutter_fee = await api.get(`/transfers/fee?amount=${amount}&currency=NGN`);
+    return flutter_fee.data.data[0].fee;
   } catch (error) {
     console.log(error);
   }
