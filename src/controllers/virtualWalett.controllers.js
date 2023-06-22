@@ -192,6 +192,10 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
 
         const data = req.body;
 
+         const charge = await getChargeFee(data.amount, "NGN");
+
+         console.log("charge",charge);
+
         if (data.amount < 100 ) {
           return res.status(404).json({ msg: ' Amount is below minimum limit of 100' });
         }
@@ -199,7 +203,9 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
         if (walett.balance <= data.amount ) {
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
-   const total_amount = (Number(data.amount) + 15).toFixed(2);
+
+       
+   const total_amount = (Number(data.amount) + 15 + charge).toFixed(2);
 
    if (walett.balance <= total_amount ) {
     return res.status(404).json({ msg: 'Insufficient funds' });
