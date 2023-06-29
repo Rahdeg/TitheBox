@@ -125,11 +125,10 @@ exports.payTithe=AsyncManager(async(req,res,next)=>{
     
     const amount = await calculateTithe(req.params.income_id, req.params.id, res);
     const charge = await getChargeFee(amount);
-    const appCharge = charge === 10.75 ? 15 : charge === 25.75 ? 50 : 100;
+    const appCharge = charge > 10 && charge < 25.75 ? 15 : charge > 25 && charge < 50.75 ? 50 :charge > 50 ? 100 :100;
     const total_amount = (Number(amount) + appCharge + charge).toFixed(2);
     const walettBalance = walett.balance;
 
-    console.log("total",total_amount);
     
 
     if (total_amount < 100 ) {
@@ -195,7 +194,8 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
         const data = req.body;
 
          const charge = await getChargeFee(data.amount);
-
+         const appCharge = charge > 10 && charge < 25.75 ? 15 : charge > 25 && charge < 50.75 ? 50 :charge > 50 ? 100 :100;
+         const total_amount = (Number(data.amount) + appCharge + charge).toFixed(2);
         
          
 
@@ -206,9 +206,7 @@ exports.otherTransfers=AsyncManager(async(req,res,next)=>{
         if (walett.balance <= data.amount ) {
           return res.status(404).json({ msg: 'Insufficient funds' });
         }
-        const appCharge = charge === 10.75 ? 15 : charge === 25.75 ? 50 : 100;
-
-        const total_amount = (Number(data.amount) + appCharge + charge).toFixed(2);
+        
 
 
 
